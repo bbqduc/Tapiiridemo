@@ -3,3 +3,10 @@ glfw/lib/
 *.swp
 main
 *.d
+glfw/support/
+Debug/
+ipch/
+*.suo
+*.sdf
+*.opensdf
+*.vcxproj.user
