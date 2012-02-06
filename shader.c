@@ -1,4 +1,5 @@
 #include "shader.h"
+#include <string.h>
 
 void printShaderInfoLog(GLint shader)
 {

@@ -3,7 +3,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <GL3\gl3w.h>
+#include <GL3/gl3w.h>
 #include <GL/glfw.h>
 #include <assert.h>
 
