@@ -1,7 +1,7 @@
 #ifndef MODEL_H
 #define MODEL_H
 
-#include <GL3\gl3w.h>
+#include <GL3/gl3w.h>
 
 typedef struct 
 {

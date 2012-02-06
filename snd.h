@@ -1,17 +1,48 @@
-#ifndef TAPIIRI_SND_H
-#define TAPIIRI_SND_H
-
-#include <stdio.h>
-#include <stdlib.h>
+#pragma once
+#include <iostream>
+#include <sstream>
 #include "bass.h"
 
-void err(const char* text);
-void snd_init();
-void snd_destroy();
-int snd_loadMOD(const char* file);
-int snd_load(const char* file);
-void snd_play(int chan);
-unsigned int snd_getPosition(int chan);
-unsigned int snd_getSeconds(int chan);
+class SoundInitializer
+{
+	private:
+		static unsigned int initialized;
+		SoundInitializer() {}
+	public:
+		static void initialize()
+		{
+			if(!initialized) if(!BASS_Init(-1,44100,0,0,NULL)) err("Cannot init audio device");
+			initialized++;
+		}
+		static void uninitialize()
+		{
+			if(initialized) initialized--;
+			if(!initialized) BASS_Free();
+		}
+		static void err(const std::string& text)
+		{
+			int err=BASS_ErrorGetCode();
+			std::stringstream ss;
+			ss<<err;
+			std::string errstr;
+			ss>>errstr;
+			std::cout << "Error(" + text + "): " + errstr << std::endl;
+			BASS_Free();
+		}
+};
 
-#endif
+class Snd
+{
+	private:
+		int handle;
+		void err(const std::string& msg);
+	public:
+		Snd();
+		Snd(const std::string& file);
+		~Snd();
+		void load(const std::string& file);
+		void loadMOD(const std::string& file);
+		void play();
+		unsigned int getPosition();
+		unsigned int getSeconds();
+};

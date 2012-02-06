@@ -1,6 +1,7 @@
 #include "model.h"
 #include <assert.h>
 #include <stdlib.h>
+#include <string.h>
 
 void modelInit(Model* model)
 {

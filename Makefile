@@ -1,15 +1,15 @@
 ###############################
 # Update sources & headers here
 
-SRC=gl3w.c shader.c
-HEADERS=shader.h
+SRC=gl3w.c shader.c model.c
+HEADERS=shader.h model.h
 MAIN=main.c
 EXENAME=main
 
 ###############################
 
 CC=gcc
-CCFLAGS=-O3 -Wall -Wextra -std=c99 -Werror
+CCFLAGS=-O3 -Wall -Wextra -std=c99
 INCLUDE=-Iglfw/include
 LIBS=-Lglfw/lib/x11 -lglfw -lGLU
 OBJ=$(SRC:.c=.o)
