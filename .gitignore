@@ -3,6 +3,7 @@ glfw/lib/
 *.swp
 main
 *.d
+*.so
 glfw/support/
 Debug/
 ipch/
