@@ -19,6 +19,7 @@ void modelVertexInit(Model* model, GLuint numVertices, GLfloat* data);
 void modelTexCoordInit(Model* model, GLuint numVertices, GLfloat* data);
 void modelNormalsInit(Model* model);
 void modelInitVBOs(Model* model);
+void modelDestroy(Model* model);
 
 
 

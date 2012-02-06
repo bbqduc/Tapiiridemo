@@ -71,3 +71,11 @@ void modelInitVBOs(Model* model)
 	glBindVertexArray(0);
 
 }
+
+void modelDestroy(Model* model)
+{
+	free(model->vertices);
+	free(model->texcoords);
+	free(model->normals);
+	free(model->indices);
+}

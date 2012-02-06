@@ -97,6 +97,6 @@ int main()
 	}
 
 	glfwTerminate();
-
+	modelDestroy(&triangle);
 	exit(EXIT_SUCCESS);
 }
