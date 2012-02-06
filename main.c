@@ -2,6 +2,7 @@
 #include <GL/glfw.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include "shader.h"
 
 int init()
 {
@@ -40,6 +41,9 @@ int main()
 		return -1;
 
 	printf("OpenGL version %s, GLSL %s\n", glGetString(GL_VERSION), glGetString(GL_SHADING_LANGUAGE_VERSION));
+
+	Shader plain;
+	shaderInitialize(&plain, "shaders/plain.vert", "shaders/plain.frag", "");
 
 	while(running)
 	{
