@@ -2,13 +2,15 @@
 #include <GL/glfw.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include "shader.h"
 
+#include "shader.h"
+#include "model.h"
 
 GLfloat vertices[] = {-1.0f, -1.0f, 0.0f,
 					1.0f, -1.0f, 0.0f,
 					0.0f, 1.0f, 0.0f};
-GLuint vertexBuffer;
+
+Model triangle;
 
 void checkGLErrors(const char* functionName){
 	GLenum err = glGetError();
@@ -45,16 +47,11 @@ int init()
 		printf("opengl 3.2 is not supported\n");
 		return -1;
 	}
-	GLuint VertexArrayID;
-	glGenVertexArrays(1, &VertexArrayID);
-	glBindVertexArray(VertexArrayID);
+
+	modelInit(&triangle);
+	modelVertexInit(&triangle, 3, &vertices[0]);
+	modelInitVBOs(&triangle);
 	
-	glGenBuffers(1, &vertexBuffer);
-
-	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
-
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), &vertices[0], GL_STATIC_DRAW);
-
 	checkGLErrors("init");
 
 	return 0;
@@ -63,15 +60,19 @@ int init()
 void drawSimpleTriangle(const Shader* shader)
 {
 	glUseProgram(shader->id);
+	glBindVertexArray(triangle.VAO_id);
+
 	glEnableVertexAttribArray(0);
 
-	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	glBindBuffer(GL_ARRAY_BUFFER, triangle.VBO_vertices_id);
+	glVertexAttribPointer(0, triangle.numVertices, GL_FLOAT, GL_FALSE, 0, 0);
 
-	glDrawArrays(GL_TRIANGLES, 0, 3);
+	glDrawArrays(GL_TRIANGLES, 0, triangle.numVertices);
 
 	glDisableVertexAttribArray(0);
+	glBindVertexArray(0);
 	glUseProgram(0);
+	
 	checkGLErrors("drawSimpleTriangle");
 }
 

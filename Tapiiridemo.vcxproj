@@ -80,9 +80,11 @@
   <ItemGroup>
     <ClCompile Include="gl3w.c" />
     <ClCompile Include="main.c" />
+    <ClCompile Include="model.c" />
     <ClCompile Include="shader.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="model.h" />
     <ClInclude Include="shader.h" />
   </ItemGroup>
   <ItemGroup>
