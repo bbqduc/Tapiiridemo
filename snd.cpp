@@ -27,23 +27,21 @@ void Snd::loadMOD(const std::string& file)
 	if(!(handle=BASS_MusicLoad(0,file.c_str(),0,0,BASS_SAMPLE_LOOP|BASS_MUSIC_RAMPS|BASS_MUSIC_PRESCAN,0))) SoundInitializer::err("Error in file");
 }
 
-void Snd::play()
+void Snd::play() const
 {
 	BASS_ChannelPlay(handle, 0);
-	std::cout << handle << std::endl;
 }
 
-unsigned int Snd::getPosition()
+unsigned long long Snd::getPosition() const
 {
 	return BASS_ChannelGetPosition(handle,BASS_POS_BYTE);
 }
 
-unsigned int Snd::getSeconds()
+unsigned int Snd::getSeconds() const
 {
 	return BASS_ChannelBytes2Seconds(handle,getPosition());
 }
 
-/*
 int main(int argc, char** argv)
 {
 	Snd s(argv[1]);
@@ -55,4 +53,3 @@ int main(int argc, char** argv)
 	}
 	return 0;
 }
-*/

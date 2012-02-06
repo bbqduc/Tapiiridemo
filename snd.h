@@ -42,7 +42,7 @@ class Snd
 		~Snd();
 		void load(const std::string& file);
 		void loadMOD(const std::string& file);
-		void play();
-		unsigned int getPosition();
-		unsigned int getSeconds();
+		void play() const;
+		unsigned long long getPosition() const;
+		unsigned int getSeconds() const;
 };
