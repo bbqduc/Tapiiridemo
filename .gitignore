@@ -3,3 +3,4 @@ glfw/lib/
 *.swp
 main
 *.d
+*.so
