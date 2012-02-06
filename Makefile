@@ -1,14 +1,25 @@
+###############################
+# Update sources & headers here
+
+SRC=gl3w.c
+HEADERS=
+MAIN=main.c
+EXENAME=main
+
+###############################
+
 CC=gcc
-CCFLAGS=-O3 -pedantic -Wall -Wextra -std=c99 -I glfw/include/ -L glfw/lib/x11/
-LIBS=-lglfw
-all: main.o gl3w.o
-	$(CC) $(CCFLAGS) $(LIBS) main.o gl3w.o -o main
+CCFLAGS=-O3 -pedantic -Wall -Wextra -std=c99
+INCLUDE=-Iglfw/include
+LIBS=-Lglfw/lib/x11 -lglfw
+OBJ=$(SRC:.c=.o)
 
-main.o:
-	$(CC) $(CCFLAGS) -c main.c
-gl3w.o:
-	$(CC) $(CCFLAGS) -c gl3w.c
-
-.PHONY: clean
+all: $(MAIN) $(OBJ)
+	$(CC) $(CCFLAGS) $(LIBS) $(MAIN) $(OBJ) -o $(EXENAME)
+$(OBJ) : $(SRC) $(HEADERS)
+%.o : %.c
+	$(CC) $(CCFLAGS) -c -MD $< -o $@ $(INCLUDE) $(LIBS)
 clean:
-	-rm *.o
+	-rm $(EXENAME)
+	-rm *.d *.o
+.PHONY: all clean

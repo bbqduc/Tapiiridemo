@@ -1,4 +1,4 @@
-glfw-2.7.2/lib/
+glfw/lib/
 *.o
 *.swp
 main
