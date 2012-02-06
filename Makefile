@@ -11,7 +11,7 @@ EXENAME=main
 CC=gcc
 CCFLAGS=-O3 -Wall -Wextra -std=c99 -Werror
 INCLUDE=-Iglfw/include
-LIBS=-Lglfw/lib/x11 -lglfw
+LIBS=-Lglfw/lib/x11 -lglfw -lGLU
 OBJ=$(SRC:.c=.o)
 
 all: $(MAIN) $(OBJ)
