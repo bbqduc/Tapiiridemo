@@ -15,7 +15,7 @@ LIBS=-Lglfw/lib/x11 -lglfw
 OBJ=$(SRC:.c=.o)
 
 all: $(MAIN) $(OBJ)
-	$(CC) $(CCFLAGS) $(LIBS) $(MAIN) $(OBJ) -o $(EXENAME)
+	$(CC) $(CCFLAGS) $(LIBS) $(MAIN) $(INCLUDE) $(OBJ) -o $(EXENAME)
 $(OBJ) : $(SRC) $(HEADERS)
 %.o : %.c
 	$(CC) $(CCFLAGS) -c -MD $< -o $@ $(INCLUDE) $(LIBS)
