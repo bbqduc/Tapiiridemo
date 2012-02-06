@@ -3,15 +3,12 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-
-int main()
+int init()
 {
-	int running = GL_TRUE;
-
 	if( !glfwInit()) 	
 	{
 		printf("GLFWINIT FAILED!\n");
-		exit( EXIT_FAILURE );
+		return -1;
 	}
 	glfwOpenWindowHint(GLFW_OPENGL_VERSION_MAJOR, 3);
 	glfwOpenWindowHint(GLFW_OPENGL_VERSION_MINOR, 2);
@@ -20,22 +17,29 @@ int main()
 	if(!glfwOpenWindow(300,300,0,0,0,0,0,0, GLFW_WINDOW))
 	{
 		glfwTerminate();
-		exit( EXIT_FAILURE );
+		return -1;
 	}
 	if(gl3wInit()) 
 	{
 		printf("Gl3w init failed!\n");
-		exit(-1);
+		return -1;
 	}
 	if(!gl3wIsSupported(3,2))
 	{
 		printf("opengl 3.2 is not supported\n");
-		exit(-1);
+		return -1;
 	}
+	return 0;
+}
+
+int main()
+{
+	int running = GL_TRUE;
+
+	if(init())
+		return -1;
 
 	printf("OpenGL version %s, GLSL %s\n", glGetString(GL_VERSION), glGetString(GL_SHADING_LANGUAGE_VERSION));
-
-
 
 	while(running)
 	{
