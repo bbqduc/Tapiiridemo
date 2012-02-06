@@ -1,4 +1,4 @@
-#include "musicmanager.h"
+#include "snd.h"
 
 void err(const char* text)
 {
