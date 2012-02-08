@@ -6,11 +6,6 @@
 #include "shader.h"
 #include "model.h"
 
-GLfloat vertices[] = {-1.0f, -1.0f, 0.0f,
-					1.0f, -1.0f, 0.0f,
-					0.0f, 1.0f, 0.0f};
-
-Model triangle;
 
 void checkGLErrors(const char* functionName){
 	GLenum err = glGetError();
@@ -48,16 +43,12 @@ int init()
 		return -1;
 	}
 
-	modelInit(&triangle);
-	modelVertexInit(&triangle, 3, &vertices[0]);
-	modelInitVBOs(&triangle);
-	
 	checkGLErrors("init");
 
 	return 0;
 }
 
-void drawSimpleTriangle(const Shader* shader)
+void drawSimpleTriangle(const Shader* shader, const Model& triangle)
 {
 	glUseProgram(shader->id);
 	glBindVertexArray(triangle.VAO_id);
@@ -72,7 +63,7 @@ void drawSimpleTriangle(const Shader* shader)
 	glDisableVertexAttribArray(0);
 	glBindVertexArray(0);
 	glUseProgram(0);
-	
+
 	checkGLErrors("drawSimpleTriangle");
 }
 
@@ -83,6 +74,14 @@ int main()
 	if(init())
 		return -1;
 
+	glm::vec3 vertices[3];
+	vertices[0] = glm::vec3(-1.0f, -1.0f, 0.0f);
+	vertices[1] = glm::vec3(1.0f, -1.0f, 0.0f);
+	vertices[2] = glm::vec3(0.0f, 1.0f, 0.0f);
+
+	glm::uvec3 polygons(0,1,2);
+
+	Model triangle(3, 1, &vertices[0], &polygons, GL_TRIANGLES);
 	printf("OpenGL version %s, GLSL %s\n", glGetString(GL_VERSION), glGetString(GL_SHADING_LANGUAGE_VERSION));
 
 	Shader plain;
@@ -91,12 +90,11 @@ int main()
 	while(running)
 	{
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		drawSimpleTriangle(&plain);
+		drawSimpleTriangle(&plain, triangle);
 		glfwSwapBuffers();
 		running = !glfwGetKey(GLFW_KEY_ESC) && glfwGetWindowParam(GLFW_OPENED);
 	}
 
 	glfwTerminate();
-	modelDestroy(&triangle);
 	exit(EXIT_SUCCESS);
 }
