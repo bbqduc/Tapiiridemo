@@ -1,5 +1,6 @@
 #include <GL3/gl3w.h>
 #include <GL/glfw.h>
+#include <GL/gl.h>
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -121,7 +122,10 @@ int main()
 		if((pos%16)==0) (beat<1.0f)?(beat+=0.05f):beat=1.0f;
 		else (beat>0)?beat-=0.0005f:beat=0.0f;
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		drawTimedTriangle(plain, triangle, beat);
+		glDisable(GL_BLEND);
 		//drawTimedTriangle(plain, fullScreenQuad, time);
 		glfwSwapBuffers();
 		running = !glfwGetKey(GLFW_KEY_ESC) && glfwGetWindowParam(GLFW_OPENED);
