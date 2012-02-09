@@ -1,5 +1,6 @@
 #include <GL3/gl3w.h>
 #include <GL/glfw.h>
+#include <GL/gl.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <vector>
@@ -120,8 +121,8 @@ void tickParticles(std::vector<Particle>& particles, GLfloat dt)
 
 void drawParticles(const std::vector<Particle>& particles, const ShaderWithMVP& shader, Model& point)
 {
-			for(auto i = particles.begin(); i != particles.end(); ++i)
-			drawParticle(shader, *i, point);
+	for(auto i = particles.begin(); i != particles.end(); ++i)
+		drawParticle(shader, *i, point);
 }
 
 Model simpleTriangleModel()
@@ -156,6 +157,14 @@ Model fullScreenQuadModel()
 	polygons2[1] = glm::uvec3(2,3,0);
 
 	return Model(4,2, &vertices2[0], &polygons2[0], GL_TRIANGLES);
+}
+
+void drawPulsingTriangle(const ShaderWithTime& shader, const Model& triangle, float beat)
+{
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	drawTimedTriangle(shader, triangle, beat);
+	glDisable(GL_BLEND);
 }
 
 int main()
@@ -195,6 +204,8 @@ int main()
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		//drawTimedTriangle(plain, triangle, beat);
 		drawParticles(particles, pointShader, point);
+		//drawPulsingTriangle(plain, triangle, beat);
+		//drawTimedTriangle(plain, fullScreenQuad, time);
 		glfwSwapBuffers();
 		running = !glfwGetKey(GLFW_KEY_ESC) && glfwGetWindowParam(GLFW_OPENED);
 	}
