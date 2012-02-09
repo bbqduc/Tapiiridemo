@@ -114,9 +114,12 @@ void tickParticles(std::vector<Particle>& particles, GLfloat dt)
 }
 
 void drawParticles(const std::vector<Particle>& particles, const ShaderWithMVP& shader, Model& point, float time)
-{
+{	
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	for(auto i = particles.begin(); i != particles.end(); ++i)
 		drawParticle(shader, *i, point, time);
+	glDisable(GL_BLEND);
 }
 
 Model simpleTriangleModel()
