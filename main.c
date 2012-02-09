@@ -113,7 +113,7 @@ int main()
 	{
 		time += 0.1f;
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		drawTimedTriangle(plain, triangle, time);
+		drawTimedTriangle(plain, fullScreenQuad, time);
 		glfwSwapBuffers();
 		running = !glfwGetKey(GLFW_KEY_ESC) && glfwGetWindowParam(GLFW_OPENED);
 	}
