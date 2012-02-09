@@ -1,7 +1,7 @@
 #pragma once
 
-#include <GL3\gl3w.h>
-#include <glm\glm.hpp>
+#include <GL3/gl3w.h>
+#include <glm/glm.hpp>
 
 struct Particle
 {
