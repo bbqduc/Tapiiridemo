@@ -1,6 +1,6 @@
 #include "glutils.h"
 #include <cstdio>
-#include <GL\GLU.h>
+#include <GL/glu.h>
 #include <cstdlib>
 
 void checkGLErrors(const char* functionName)
