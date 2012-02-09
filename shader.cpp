@@ -10,7 +10,7 @@ void printShaderInfoLog(GLint shader)
 
 	glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &infoLogLen);
 
-	if (infoLogLen > 0)
+	if (infoLogLen > 1)
 	{
 		infoLog = (GLchar*)malloc(sizeof(GLchar)*infoLogLen);
 
