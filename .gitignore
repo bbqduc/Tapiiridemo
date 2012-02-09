@@ -11,3 +11,4 @@ ipch/
 *.sdf
 *.opensdf
 *.vcxproj.user
+Release/

@@ -86,13 +86,14 @@ void drawTimedTriangle(const ShaderWithTime& shader, const Model& triangle, floa
 	checkGLErrors("drawTimedTriangle");
 }
 
-void drawParticle(const ShaderWithMVP& shader, const Particle& particle, const Model& point)
+void drawParticle(const ShaderWithMVP& shader, const Particle& particle, const Model& point, float time)
 {
 	glm::mat4 perspective = glm::perspective(45.0f, 1024.0f/768.0f, 1.0f, 1000.0f);
 	glm::mat4 MVP = glm::translate(glm::mat4(), particle.position);
+	glm::mat4 rotate = glm::rotate(glm::mat4(), time, glm::vec3(0.0f, 1.0f, 0.0f));
 	glm::mat4 cam = glm::translate(glm::mat4(), glm::vec3(0.0f, 0.0f, -5.0f));
 
-	glm::mat4 result = perspective * MVP * cam;
+	glm::mat4 result = rotate *perspective * MVP * cam;
 
 	glUseProgram(shader.id);
 	glUniformMatrix4fv(shader.MVPLocation, 1, GL_FALSE, glm::value_ptr(result));
@@ -110,19 +111,19 @@ void tickParticles(std::vector<Particle>& particles, GLfloat dt)
 {
 	for(auto i = particles.begin(); i != particles.end(); ++i)
 	{
-		if(i->position.y < 0.0f)
+		if(i->position.y < -5.0f)
 		{
 			i->position = glm::vec3(0.0f);
-			i->velocity = glm::vec3((rand()%50-25)/10.0f, 4.0f+(rand()%30-15)/10.0f, 0.0f);
+			i->velocity = glm::vec3((rand()%50-25)/10.0f, 4.0f+(rand()%30-15)/10.0f, (rand()%50-25)/10.0f);
 		}
 		i->tick(dt);
 	}
 }
 
-void drawParticles(const std::vector<Particle>& particles, const ShaderWithMVP& shader, Model& point)
+void drawParticles(const std::vector<Particle>& particles, const ShaderWithMVP& shader, Model& point, float time)
 {
 	for(auto i = particles.begin(); i != particles.end(); ++i)
-		drawParticle(shader, *i, point);
+		drawParticle(shader, *i, point, time);
 }
 
 Model simpleTriangleModel()
@@ -184,8 +185,8 @@ int main()
 	Model point = pointModel();
 
 	std::vector<Particle> particles;
-	for(int i = 0; i < 5000; ++i)
-		particles.push_back(Particle(glm::vec3(0,-1,0), glm::vec3(0,0,0)));
+	for(int i = 0; i < 1000; ++i)
+		particles.push_back(Particle(glm::vec3(0,-100,0), glm::vec3(0,0,0)));
 
 	ShaderWithTime plain;
 	plain.initialize("shaders/timemover.vert", "shaders/music.frag", 0);
@@ -200,10 +201,10 @@ int main()
 		int pos=s.getMODPosition().second;
 		time += 0.1f;
 		if((pos%16)==0) (beat<1.0f)?(beat+=0.05f):beat=1.0f;
-		else (beat>0)?beat-=0.0005f:beat=0.0f;
+		else (beat>0)?beat-=0.005f:beat=0.0f;
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		//drawTimedTriangle(plain, triangle, beat);
-		drawParticles(particles, pointShader, point);
+		drawParticles(particles, pointShader, point, time);
 		//drawPulsingTriangle(plain, triangle, beat);
 		//drawTimedTriangle(plain, fullScreenQuad, time);
 		glfwSwapBuffers();
