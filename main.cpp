@@ -7,6 +7,7 @@
 #include <ctime>
 #include <cstdlib>
 
+#include "glutils.h"
 #include "snd.h"
 #include "shader.h"
 #include "model.h"
@@ -15,15 +16,7 @@
 #include <glm/gtc/type_ptr.hpp>
 
 
-void checkGLErrors(const char* functionName)
-{
-	GLenum err = glGetError();
-	if(err != GL_NO_ERROR)
-	{
-		fprintf(stderr, "%s -- ERROR: %s\n", functionName, gluErrorString(err));
-		exit(-1);
-	}
-}
+
 
 int init()
 {
@@ -93,14 +86,14 @@ void drawParticle(const ShaderWithMVP& shader, const Particle& particle, const M
 	glm::mat4 rotate = glm::rotate(glm::mat4(), time, glm::vec3(0.0f, 1.0f, 0.0f));
 	glm::mat4 cam = glm::translate(glm::mat4(), glm::vec3(0.0f, 0.0f, -5.0f));
 
-	glm::mat4 result = rotate *perspective * MVP * cam;
+	glm::mat4 result = perspective * MVP * cam;
 
 	glUseProgram(shader.id);
 	glUniformMatrix4fv(shader.MVPLocation, 1, GL_FALSE, glm::value_ptr(result));
 
 	glBindVertexArray(point.VAO_id);
 	glBindBuffer(GL_ARRAY_BUFFER, point.VBO_vertices_id);
-	glDrawElements(point.drawMode, 1, GL_UNSIGNED_INT, 0);
+	glDrawElements(GL_POINTS, 1, GL_UNSIGNED_INT, 0);
 
 	glUseProgram(0);
 
@@ -191,7 +184,7 @@ int main()
 	ShaderWithTime plain;
 	plain.initialize("shaders/timemover.vert", "shaders/music.frag", 0);
 	ShaderWithMVP pointShader;
-	pointShader.initialize("shaders/plainMVP.vert", "shaders/plain.frag", 0);
+	pointShader.initialize("shaders/plainMVP.vert", "shaders/plain.frag", "shaders/pointToSquare.geom");
 	checkGLErrors("beforemainloop");
 	float time = 0.0f;
 	float beat = 1.0f;

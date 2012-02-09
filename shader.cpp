@@ -1,5 +1,6 @@
 #include "shader.h"
 #include <string.h>
+#include "glutils.h"
 
 void printShaderInfoLog(GLint shader)
 {
@@ -53,8 +54,8 @@ int Shader::initialize(const char* vertexPath, const char* fragmentPath, const c
 	if(geometrySize) g = glCreateShader(GL_GEOMETRY_SHADER);
 
 	const GLchar* vcode = vertexSource, // need consts for opengl
-	      *fcode = fragmentSource,
-	      *gcode = geometrySource;
+		*fcode = fragmentSource,
+		*gcode = geometrySource;
 
 	if(vertexSize) glShaderSource(v, 1, &vcode, &vertexSize);
 	if(fragmentSize) glShaderSource(f, 1, &fcode, &fragmentSize);
@@ -104,7 +105,19 @@ int Shader::initialize(const char* vertexPath, const char* fragmentPath, const c
 	id = glCreateProgram();
 	if(vertexSize) glAttachShader(id, v);
 	if(fragmentSize) glAttachShader(id, f);
-	if(geometrySize) glAttachShader(id, g);
+	if(geometrySize)
+	{
+		glAttachShader(id, g);
+		/*checkGLErrors("geometry shader parameter passing1");
+		glProgramParameteri(id, GL_GEOMETRY_INPUT_TYPE, GL_POINTS);
+		checkGLErrors("geometry shader parameter passing2");
+		glProgramParameteri(id, GL_GEOMETRY_OUTPUT_TYPE, GL_POINTS);
+		checkGLErrors("geometry shader parameter passing3");
+		glProgramParameteri(id, GL_GEOMETRY_VERTICES_OUT, 1);
+		checkGLErrors("geometry shader parameter passing4");*/
+	}
+
+
 
 	glLinkProgram(id);
 	glUseProgram(id);

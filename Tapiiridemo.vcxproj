@@ -82,6 +82,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="gl3w.c" />
+    <ClCompile Include="glutils.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="model.cpp" />
     <ClCompile Include="shader.cpp" />
@@ -90,6 +91,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="bass.h" />
+    <ClInclude Include="glutils.h" />
     <ClInclude Include="model.h" />
     <ClInclude Include="shader.h" />
     <ClInclude Include="particle.h" />
@@ -103,6 +105,7 @@
     <None Include="shaders\plain.frag" />
     <None Include="shaders\plain.vert" />
     <None Include="shaders\plainMVP.vert" />
+    <None Include="shaders\pointToSquare.geom" />
     <None Include="shaders\timemover.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
