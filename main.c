@@ -48,9 +48,29 @@ int init()
 	return 0;
 }
 
-void drawSimpleTriangle(const Shader* shader, const Model& triangle)
+void drawSimpleTriangle(const Shader& shader, const Model& triangle)
 {
-	glUseProgram(shader->id);
+	glUseProgram(shader.id);
+	glBindVertexArray(triangle.VAO_id);
+
+	glEnableVertexAttribArray(0);
+
+	glBindBuffer(GL_ARRAY_BUFFER, triangle.VBO_vertices_id);
+	glVertexAttribPointer(0, triangle.numVertices, GL_FLOAT, GL_FALSE, 0, 0);
+
+	glDrawArrays(GL_TRIANGLES, 0, triangle.numVertices);
+
+	glDisableVertexAttribArray(0);
+	glBindVertexArray(0);
+	glUseProgram(0);
+
+	checkGLErrors("drawSimpleTriangle");
+}
+
+void drawTimedTriangle(const ShaderWithTime& shader, const Model& triangle, float time)
+{
+	glUseProgram(shader.id);
+	glUniform1f(shader.timeLocation, time);
 	glBindVertexArray(triangle.VAO_id);
 
 	glEnableVertexAttribArray(0);
@@ -84,13 +104,15 @@ int main()
 	Model triangle(3, 1, &vertices[0], &polygons, GL_TRIANGLES);
 	printf("OpenGL version %s, GLSL %s\n", glGetString(GL_VERSION), glGetString(GL_SHADING_LANGUAGE_VERSION));
 
-	Shader plain;
-	shaderInitialize(&plain, "shaders/plain.vert", "shaders/plain.frag", "");
+	ShaderWithTime plain;
+	plain.initialize("l", "shaders/disco.frag", "l");
 	checkGLErrors("beforemainloop");
+	float time = 0.0f;
 	while(running)
 	{
+		time += 0.001f;
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		drawSimpleTriangle(&plain, triangle);
+		drawTimedTriangle(plain, triangle, time);
 		glfwSwapBuffers();
 		running = !glfwGetKey(GLFW_KEY_ESC) && glfwGetWindowParam(GLFW_OPENED);
 	}

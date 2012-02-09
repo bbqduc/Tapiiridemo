@@ -19,69 +19,77 @@ void printShaderInfoLog(GLint shader)
 	}
 }
 
-int shaderInitialize(Shader* shader, const char* vertexPath, const char* fragmentPath, const char* geometryPath)
+GLint Shader::readShaderSource(const char* path, GLchar** target)
 {
-	assert(shader);
+	printf("strlen : %d\n", strlen(path)); 
+	if(strlen(path) < 2)
+		return 0;
+	FILE* file = fopen(path, "rb");
+	fseek(file, 0L, SEEK_END);
+	GLint size = ftell(file);
+	fseek(file, 0L, SEEK_SET);
 
-	int compileGeom = strlen(geometryPath);
-	FILE* vertexFile = fopen(vertexPath, "rb"), // "b" is necessary because windows
-		*fragmentFile = fopen(fragmentPath, "rb"),
-		*geometryFile = compileGeom ? fopen(geometryPath, "r") : 0;
+	*target = (GLchar*)malloc(sizeof(GLchar)*size);
+	fread(target, sizeof(GLchar), size, file);
 
-	fseek(vertexFile, 0L, SEEK_END);
-	fseek(fragmentFile, 0L, SEEK_END);
-	if(compileGeom) fseek(geometryFile, 0L, SEEK_END);
+	fclose(file);
 
-	GLint vertexSize = ftell(vertexFile), fragmentSize = ftell(fragmentFile), geometrySize = compileGeom ? ftell(geometryFile) : 0;
+	return size;
+}
 
-	fseek(vertexFile, 0L, SEEK_SET);
-	fseek(fragmentFile, 0L, SEEK_SET);
-	if(compileGeom) fseek(geometryFile, 0L, SEEK_SET);
+int Shader::initialize(const char* vertexPath, const char* fragmentPath, const char* geometryPath)
+{
+	GLchar* vertexSource, *fragmentSource, *geometrySource;
+	GLint vertexSize = 0, fragmentSize = 0, geometrySize = 0;
+	vertexSize = readShaderSource(vertexPath, &vertexSource);
+	fragmentSize = readShaderSource(fragmentPath, &fragmentSource);
+	geometrySize = readShaderSource(geometryPath, &geometrySource);
 
-	GLchar* vertexCode = (GLchar*)malloc(sizeof(GLchar)*vertexSize),
-		*fragmentCode = (GLchar*)malloc(sizeof(GLchar)*fragmentSize),
-		*geometryCode = compileGeom ? (GLchar*)malloc(sizeof(GLchar)*geometrySize) : 0;
-
-	fread(vertexCode, sizeof(GLchar), vertexSize, vertexFile);
-	fread(fragmentCode, sizeof(GLchar), fragmentSize, fragmentFile);
-	if(compileGeom) fread(geometryCode, sizeof(GLchar), geometrySize, geometryFile);
+	printf("vsize %d\n", vertexSize);	
 
 	GLuint v,f,g;
-	v = glCreateShader(GL_VERTEX_SHADER);
-	f = glCreateShader(GL_FRAGMENT_SHADER);
-	if(compileGeom) g = glCreateShader(GL_GEOMETRY_SHADER);
 
-	const GLchar* vcode = vertexCode,
-		*fcode = fragmentCode,
-		*gcode = geometryCode;
+	if(vertexSize) v = glCreateShader(GL_VERTEX_SHADER);
+	if(fragmentSize) f = glCreateShader(GL_FRAGMENT_SHADER);
+	if(geometrySize) g = glCreateShader(GL_GEOMETRY_SHADER);
 
-	glShaderSource(v, 1, &vcode, &vertexSize);
-	glShaderSource(f, 1, &fcode, &fragmentSize);
-	if(compileGeom) glShaderSource(g, 1, &gcode, &geometrySize);
+	const GLchar* vcode = vertexSource, // need consts for opengl
+	      *fcode = fragmentSource,
+	      *gcode = geometrySource;
+
+	if(vertexSize) glShaderSource(v, 1, &vcode, &vertexSize);
+	if(fragmentSize) glShaderSource(f, 1, &fcode, &fragmentSize);
+	if(geometrySize) glShaderSource(g, 1, &gcode, &geometrySize);
 
 	GLint compiled;
 
-	glCompileShader(v);
-	glGetShaderiv(v, GL_COMPILE_STATUS, &compiled);
-	if (!compiled)
+	if(vertexSize)
 	{
-		printf("Vertex shader %s not compiled.\n", vertexPath);
-		printShaderInfoLog(v);
-		return -1;
+		glCompileShader(v);
+		glGetShaderiv(v, GL_COMPILE_STATUS, &compiled);
+		if (!compiled)
+		{
+			printf("Vertex shader %s not compiled.\n", vertexPath);
+			printShaderInfoLog(v);
+			return -1;
+		}
+		printf("Vertex shader %s compiled succesfully.\n", vertexPath);
 	}
-	printf("Vertex shader %s compiled succesfully.\n", vertexPath);
 
-	glCompileShader(f);
-	glGetShaderiv(f, GL_COMPILE_STATUS, &compiled);
-	if (!compiled)
+	if(fragmentSize)
 	{
-		printf("Fragment shader %s not compiled.\n", fragmentPath);
-		printShaderInfoLog(f);
-		return -1;
+		glCompileShader(f);
+		glGetShaderiv(f, GL_COMPILE_STATUS, &compiled);
+		if (!compiled)
+		{
+			printf("Fragment shader %s not compiled.\n", fragmentPath);
+			printShaderInfoLog(f);
+			return -1;
+		}
+		printf("Fragment shader %s compiled succesfully.\n", fragmentPath);
 	}
-	printf("Fragment shader %s compiled succesfully.\n", fragmentPath);
 
-	if(compileGeom)
+	if(geometrySize)
 	{
 		glCompileShader(g);
 		glGetShaderiv(g, GL_COMPILE_STATUS, &compiled);
@@ -94,21 +102,33 @@ int shaderInitialize(Shader* shader, const char* vertexPath, const char* fragmen
 		printf("Geometry shader %s compiled succesfully.\n", geometryPath);
 	}
 
-	shader->id = glCreateProgram();
-	glAttachShader(shader->id, v);
-	glAttachShader(shader->id, f);
-	if(compileGeom) glAttachShader(shader->id, g);
+	id = glCreateProgram();
+	if(vertexSize) glAttachShader(id, v);
+	if(fragmentSize) glAttachShader(id, f);
+	if(geometrySize) glAttachShader(id, g);
 
-	glLinkProgram(shader->id);
-	glUseProgram(shader->id);
+	glLinkProgram(id);
+	glUseProgram(id);
 
-	printShaderInfoLog(v);
-	printShaderInfoLog(f);
-	if(compileGeom) printShaderInfoLog(g);
+	if(vertexSize) printShaderInfoLog(v);
+	if(fragmentSize) printShaderInfoLog(f);
+	if(geometrySize) printShaderInfoLog(g);
 
-	free(vertexCode); free(fragmentCode); free(geometryCode);
-	fclose(vertexFile); fclose(fragmentFile); if(compileGeom) fclose(geometryFile);
+	free(vertexSource); free(fragmentSource); free(geometrySource);
 
 	return 0;
 }
 
+int ShaderWithTime::initialize(const char* vertexPath, const char* fragmentPath, const char* geometryPath)
+{
+	Shader::initialize(vertexPath, fragmentPath, geometryPath);
+	timeLocation = glGetUniformLocation(id, "time");
+	return 0;
+}
+
+int ShaderWithMVP::initialize(const char* vertexPath, const char* fragmentPath, const char* geometryPath)
+{
+	Shader::initialize(vertexPath, fragmentPath, geometryPath);
+	MVPLocation = glGetUniformLocation(id, "MVP");
+	return 0;
+}

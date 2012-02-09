@@ -7,13 +7,26 @@
 #include <GL/glfw.h>
 #include <assert.h>
 
-typedef struct
+struct Shader
 {
 	GLuint id;
-} Shader;
+	GLint readShaderSource(const char* path, char** target);
+	int initialize(const char* vertexPath, const char* fragmentPath, const char* geometryPath);
+};
+
+struct ShaderWithTime : public Shader
+{
+	GLint timeLocation;
+	int initialize(const char* vertexPath, const char* fragmentPath, const char* geometryPath);
+};
+
+struct ShaderWithMVP : public Shader
+{
+	GLint MVPLocation;
+	int initialize(const char* vertexPath, const char* fragmentPath, const char* geometryPath);
+};
 
 void printShaderInfoLog(GLint shader);
-int shaderInitialize(Shader* shader, const char* vertexPath, const char* fragmentPath, const char* geometryPath);
 
 
 

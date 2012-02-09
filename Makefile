@@ -9,7 +9,7 @@ EXENAME=main
 ###############################
 
 CC=g++
-CCFLAGS=-O3 -Wall -Wextra -std=c++0x
+CCFLAGS=-ggdb -Wall -Wextra -std=c++0x
 INCLUDE=-Iglfw/include
 LIBS=-Lglfw/lib/x11 -lglfw -lGLU
 OBJ=$(SRC:.c=.o)
