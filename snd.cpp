@@ -49,7 +49,7 @@ int main(int argc, char** argv)
 	for(int i=0;i<5; ++i)
 	{
 		std::cout << s.getPosition() << " - " << s.getSeconds() << std::endl;
-		sleep(1);
+		//sleep(1);
 	}
 	return 0;
 }

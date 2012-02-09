@@ -21,16 +21,17 @@ void printShaderInfoLog(GLint shader)
 
 GLint Shader::readShaderSource(const char* path, GLchar** target)
 {
-	printf("strlen : %d\n", strlen(path)); 
-	if(strlen(path) < 2)
+	if(!path)
 		return 0;
 	FILE* file = fopen(path, "rb");
+	if(!file)
+		return 0;
 	fseek(file, 0L, SEEK_END);
 	GLint size = ftell(file);
 	fseek(file, 0L, SEEK_SET);
 
 	*target = (GLchar*)malloc(sizeof(GLchar)*size);
-	fread(target, sizeof(GLchar), size, file);
+	fread(*target, sizeof(GLchar), size, file);
 
 	fclose(file);
 
@@ -39,7 +40,7 @@ GLint Shader::readShaderSource(const char* path, GLchar** target)
 
 int Shader::initialize(const char* vertexPath, const char* fragmentPath, const char* geometryPath)
 {
-	GLchar* vertexSource, *fragmentSource, *geometrySource;
+	GLchar* vertexSource = 0, *fragmentSource = 0, *geometrySource = 0;
 	GLint vertexSize = 0, fragmentSize = 0, geometrySize = 0;
 	vertexSize = readShaderSource(vertexPath, &vertexSource);
 	fragmentSize = readShaderSource(fragmentPath, &fragmentSource);

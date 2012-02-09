@@ -105,7 +105,7 @@ int main()
 	printf("OpenGL version %s, GLSL %s\n", glGetString(GL_VERSION), glGetString(GL_SHADING_LANGUAGE_VERSION));
 
 	ShaderWithTime plain;
-	plain.initialize("l", "shaders/disco.frag", "l");
+	plain.initialize(0, "shaders/disco.frag", 0);
 	checkGLErrors("beforemainloop");
 	float time = 0.0f;
 	while(running)
