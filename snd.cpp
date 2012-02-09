@@ -48,6 +48,26 @@ unsigned int Snd::getSeconds() const
 {
 	return BASS_ChannelBytes2Seconds(handle,getPosition());
 }
+bool Snd::get4th() const
+{
+	return (((BASS_ChannelGetPosition(handle,BASS_POS_MUSIC_ORDER))>>16)%16)==0;
+}
+bool Snd::get8th() const
+{
+	return (((BASS_ChannelGetPosition(handle,BASS_POS_MUSIC_ORDER))>>16)%8)==0;
+}
+bool Snd::get16th() const
+{
+	return (((BASS_ChannelGetPosition(handle,BASS_POS_MUSIC_ORDER))>>16)%4)==0;
+}
+bool Snd::getMeasure() const
+{
+	return (((BASS_ChannelGetPosition(handle,BASS_POS_MUSIC_ORDER))>>16))==0;
+}
+bool Snd::getCustom(unsigned int position) const
+{
+	return (((BASS_ChannelGetPosition(handle,BASS_POS_MUSIC_ORDER))>>16)%position)==0;
+}
 /*
 int main(int argc, char** argv)
 {

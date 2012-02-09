@@ -197,16 +197,11 @@ int main()
 	pointShader.initialize("shaders/plainMVP.vert", "shaders/plain.frag", "shaders/pointToSquare.geom");
 	checkGLErrors("beforemainloop");
 	float time = 0.0f;
-	float beat = 1.0f;
 	while(running)
 	{
 		tickParticles(particles, 0.01f);
-		int pos=s.getMODPosition().second;
 		time += 0.1f;
-		if((pos%16)==0) (beat<1.0f)?(beat+=0.05f):beat=1.0f;
-		else (beat>0)?beat-=0.005f:beat=0.0f;
-
-		if((pos%16)==0)
+		if(s.get4th())
 			emitParticles(particles, 100);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		//drawTimedTriangle(plain, triangle, beat);

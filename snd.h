@@ -46,4 +46,9 @@ class Snd
 		unsigned long long getPosition() const;
 		std::pair<int,int> getMODPosition() const;
 		unsigned int getSeconds() const;
+		bool get4th() const;
+		bool get8th() const;
+		bool get16th() const;
+		bool getMeasure() const;
+		bool getCustom(unsigned int position) const;
 };
