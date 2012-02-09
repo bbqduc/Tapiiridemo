@@ -5,6 +5,7 @@
 
 #include "shader.h"
 #include "model.h"
+#include "snd.h"
 
 
 void checkGLErrors(const char* functionName){
@@ -79,6 +80,9 @@ void drawTimedTriangle(const ShaderWithTime& shader, const Model& triangle, floa
 
 int main()
 {
+	Snd s;
+	s.loadMOD("test.xm");
+	s.play();
 	int running = GL_TRUE;
 
 	if(init())
@@ -106,14 +110,18 @@ int main()
 	printf("OpenGL version %s, GLSL %s\n", glGetString(GL_VERSION), glGetString(GL_SHADING_LANGUAGE_VERSION));
 
 	ShaderWithTime plain;
-	plain.initialize("shaders/timemover.vert", "shaders/distanceblur.frag", 0);
+	plain.initialize("shaders/timemover.vert", "shaders/music.frag", 0);
 	checkGLErrors("beforemainloop");
 	float time = 0.0f;
+	float beat = 1.0f;
 	while(running)
 	{
+		int pos=s.getMODPosition().second;
 		time += 0.1f;
+		if((pos%16)==0) (beat<1.0f)?(beat+=0.05f):beat=1.0f;
+		else (beat>0)?beat-=0.0005f:beat=0.0f;
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		drawTimedTriangle(plain, triangle, time);
+		drawTimedTriangle(plain, triangle, beat);
 		glfwSwapBuffers();
 		running = !glfwGetKey(GLFW_KEY_ESC) && glfwGetWindowParam(GLFW_OPENED);
 	}

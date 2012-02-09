@@ -44,5 +44,6 @@ class Snd
 		void loadMOD(const std::string& file);
 		void play() const;
 		unsigned long long getPosition() const;
+		std::pair<int,int> getMODPosition() const;
 		unsigned int getSeconds() const;
 };
