@@ -93,6 +93,7 @@
     <ClInclude Include="bass.h" />
     <ClInclude Include="glutils.h" />
     <ClInclude Include="model.h" />
+    <ClInclude Include="particleemitter.h" />
     <ClInclude Include="shader.h" />
     <ClInclude Include="particle.h" />
     <ClInclude Include="snd.h" />

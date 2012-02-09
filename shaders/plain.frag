@@ -1,6 +1,6 @@
 #version 330 core
 
-in vec2 centerPosition;
+smooth in vec2 relativeToCenter;
 out vec4 vFragColor;
 
 float gauss(float x, float a)
@@ -16,7 +16,7 @@ float blob(vec2 o, vec2 p)
 void main(void)
 {
 	vec2 relativePosition = -1.0 + 2.0 * gl_FragCoord.xy / vec2(1024,768);
-	vec2 relativeCenterPosition = -1.0 + 2.0 * centerPosition / vec2(1024,768);
-	float dist = distance(centerPosition, relativePosition);
-	vFragColor = vec4(centerPosition.x, centerPosition.y, dist, 0.2); //vec4(vec3(dist/2), 1.0f);//vec4(sin(dist), cos(dist), 0.0, gauss(dist, 2.0)); //vec4(relativePosition.x, relativePosition.y, 1.0, 1.0);
+	float dist = relativeToCenter.x*relativeToCenter.x + relativeToCenter.y * relativeToCenter.y;
+	dist *= 10;
+	vFragColor = vec4(vec3(1.0f-dist), dist);//1-dist); //vec4(vec3(dist/2), 1.0f);//vec4(sin(dist), cos(dist), 0.0, gauss(dist, 2.0)); //vec4(relativePosition.x, relativePosition.y, 1.0, 1.0);
 }
