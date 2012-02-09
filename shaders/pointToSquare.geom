@@ -2,12 +2,12 @@
 
 layout(points) in;
 layout(triangle_strip, max_vertices=4) out;
-out vec3 centerPosition;
+out vec2 centerPosition;
 
 void main()
 {
 	vec4 point = gl_in[0].gl_Position;
-	centerPosition = vec3(point);
+	centerPosition = vec2(point);
 	
 	gl_Position = point + vec4(-0.1f,-0.1f,0,0);
 	EmitVertex();

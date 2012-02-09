@@ -3,7 +3,7 @@
 #include <GL/gl.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <vector>
+#include <list>
 #include <ctime>
 #include <cstdlib>
 
@@ -100,20 +100,29 @@ void drawParticle(const ShaderWithMVP& shader, const Particle& particle, const M
 	checkGLErrors("drawParticle");
 }
 
-void tickParticles(std::vector<Particle>& particles, GLfloat dt)
+void emitParticles(std::list<Particle>& particles, int amount)
 {
-	for(auto i = particles.begin(); i != particles.end(); ++i)
+	for(int i = 0; i < amount; ++i)
 	{
-		if(i->position.y < -5.0f)
-		{
-			i->position = glm::vec3(0.0f);
-			i->velocity = glm::vec3((rand()%50-25)/10.0f, 4.0f+(rand()%30-15)/10.0f, (rand()%50-25)/10.0f);
-		}
-		i->tick(dt);
+		particles.push_back(Particle());
+		particles.back().randomize();
 	}
 }
 
-void drawParticles(const std::vector<Particle>& particles, const ShaderWithMVP& shader, Model& point, float time)
+void tickParticles(std::list<Particle>& particles, GLfloat dt)
+{
+	for(auto i = particles.begin(); i != particles.end();)
+	{
+		if(i->position.y < -5.0f)
+		{
+			auto j = i; ++i; particles.erase(j, i);
+		}
+		i->tick(dt);
+		++i;
+	}
+}
+
+void drawParticles(const std::list<Particle>& particles, const ShaderWithMVP& shader, Model& point, float time)
 {	
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -180,9 +189,7 @@ int main()
 	Model fullScreenQuad = fullScreenQuadModel();
 	Model point = pointModel();
 
-	std::vector<Particle> particles;
-	for(int i = 0; i < 1000; ++i)
-		particles.push_back(Particle(glm::vec3(0,-100,0), glm::vec3(0,0,0)));
+	std::list<Particle> particles;
 
 	ShaderWithTime plain;
 	plain.initialize("shaders/timemover.vert", "shaders/music.frag", 0);
@@ -198,6 +205,9 @@ int main()
 		time += 0.1f;
 		if((pos%16)==0) (beat<1.0f)?(beat+=0.05f):beat=1.0f;
 		else (beat>0)?beat-=0.005f:beat=0.0f;
+
+		if((pos%16)==0)
+			emitParticles(particles, 100);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		//drawTimedTriangle(plain, triangle, beat);
 		drawParticles(particles, pointShader, point, time);
