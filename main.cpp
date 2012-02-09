@@ -122,6 +122,7 @@ int main()
 		else (beat>0)?beat-=0.0005f:beat=0.0f;
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		drawTimedTriangle(plain, triangle, beat);
+		//drawTimedTriangle(plain, fullScreenQuad, time);
 		glfwSwapBuffers();
 		running = !glfwGetKey(GLFW_KEY_ESC) && glfwGetWindowParam(GLFW_OPENED);
 	}

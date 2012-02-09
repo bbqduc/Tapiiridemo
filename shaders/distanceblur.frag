@@ -3,7 +3,7 @@
 uniform float time;
 
 out vec4 vFragColor;
-smooth in float distance;
+smooth in float dist;
 
 float gauss(float x, float a)
 {
@@ -12,7 +12,9 @@ float gauss(float x, float a)
 
 void main(void)
 {
-	vec2 relativePosition = gl_FragCoord.xy / vec2(300, 300) + vec2(sin(time), cos(time));
-	float blur = gauss(2, distance);
-	vFragColor = vec4(relativePosition.x, relativePosition.y, 1.0, 1.0)*blur;
+	vFragColor = vec4(sin(time), cos(time), 0, 1);
+	vec2 relativePosition = gl_FragCoord.xy / vec2(1024, 768);
+	float dist2 = relativePosition.x*relativePosition.x + relativePosition.y*relativePosition.y;
+	float blur = gauss(1, dist2);
+	vFragColor *= blur;
 }
