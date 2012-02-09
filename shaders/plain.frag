@@ -1,10 +1,8 @@
 #version 330 core
 
-uniform float time;
-
 out vec4 vFragColor;
 void main(void)
 {
-	vec2 relativePosition = gl_FragCoord.xy / vec2(1024, 768) + vec2(sin(time), cos(time));
+	vec2 relativePosition = gl_FragCoord.xy / vec2(1024, 768);
 	vFragColor = vec4(relativePosition.x, relativePosition.y, 1.0, 1.0);
 }

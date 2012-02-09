@@ -2,13 +2,20 @@
 #include <GL/glfw.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <vector>
+#include <ctime>
+#include <cstdlib>
 
+#include "snd.h"
 #include "shader.h"
 #include "model.h"
-#include "snd.h"
+#include "particle.h"
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 
-void checkGLErrors(const char* functionName){
+void checkGLErrors(const char* functionName)
+{
 	GLenum err = glGetError();
 	if(err != GL_NO_ERROR)
 	{
@@ -78,23 +85,66 @@ void drawTimedTriangle(const ShaderWithTime& shader, const Model& triangle, floa
 	checkGLErrors("drawTimedTriangle");
 }
 
-int main()
+void drawParticle(const ShaderWithMVP& shader, const Particle& particle, const Model& point)
 {
-	Snd s;
-	s.loadMOD("test.xm");
-	s.play();
-	int running = GL_TRUE;
+	glm::mat4 perspective = glm::perspective(45.0f, 1024.0f/768.0f, 1.0f, 1000.0f);
+	glm::mat4 MVP = glm::translate(glm::mat4(), particle.position);
+	glm::mat4 cam = glm::translate(glm::mat4(), glm::vec3(0.0f, 0.0f, -5.0f));
 
-	if(init())
-		return -1;
+	glm::mat4 result = perspective * MVP * cam;
 
+	glUseProgram(shader.id);
+	glUniformMatrix4fv(shader.MVPLocation, 1, GL_FALSE, glm::value_ptr(result));
+
+	glBindVertexArray(point.VAO_id);
+	glBindBuffer(GL_ARRAY_BUFFER, point.VBO_vertices_id);
+	glDrawElements(point.drawMode, 1, GL_UNSIGNED_INT, 0);
+
+	glUseProgram(0);
+
+	checkGLErrors("drawParticle");
+}
+
+void tickParticles(std::vector<Particle>& particles, GLfloat dt)
+{
+	for(auto i = particles.begin(); i != particles.end(); ++i)
+	{
+		if(i->position.y < 0.0f)
+		{
+			i->position = glm::vec3(0.0f);
+			i->velocity = glm::vec3((rand()%50-25)/10.0f, 4.0f+(rand()%30-15)/10.0f, 0.0f);
+		}
+		i->tick(dt);
+	}
+}
+
+void drawParticles(const std::vector<Particle>& particles, const ShaderWithMVP& shader, Model& point)
+{
+			for(auto i = particles.begin(); i != particles.end(); ++i)
+			drawParticle(shader, *i, point);
+}
+
+Model simpleTriangleModel()
+{
 	glm::vec3 vertices[3];
 	vertices[0] = glm::vec3(-1.0f, -1.0f, 0.0f);
 	vertices[1] = glm::vec3(1.0f, -1.0f, 0.0f);
 	vertices[2] = glm::vec3(0.0f, 1.0f, 0.0f);
 
 	glm::uvec3 polygons(0,1,2);
+	return Model(3, 1, &vertices[0], &polygons, GL_TRIANGLES);
+}
 
+Model pointModel()
+{
+	glm::vec3 point = glm::vec3(0,0,0);
+	glm::uvec3 pointPolygon = glm::uvec3(0,0,0);
+
+	return Model(1,1, &point, &pointPolygon, GL_POINTS);
+}
+
+Model fullScreenQuadModel()
+{
 	glm::vec3 vertices2[4];
 	vertices2[0] = glm::vec3(-1.0f, -1.0f, 0.0f);
 	vertices2[1] = glm::vec3(-1.0f, 1.0f, 0.0f);
@@ -105,24 +155,46 @@ int main()
 	polygons2[0] = glm::uvec3(0,1,2);
 	polygons2[1] = glm::uvec3(2,3,0);
 
-	Model triangle(3, 1, &vertices[0], &polygons, GL_TRIANGLES);
-	Model fullScreenQuad(4,2, &vertices2[0], &polygons2[0], GL_TRIANGLES);
+	return Model(4,2, &vertices2[0], &polygons2[0], GL_TRIANGLES);
+}
+
+int main()
+{
+	srand(time(0));
+	Snd s;
+	s.loadMOD("test.xm");
+	s.play();
+	int running = GL_TRUE;
+
+	if(init())
+		return -1;
 	printf("OpenGL version %s, GLSL %s\n", glGetString(GL_VERSION), glGetString(GL_SHADING_LANGUAGE_VERSION));
+
+	Model triangle = simpleTriangleModel();
+	Model fullScreenQuad = fullScreenQuadModel();
+	Model point = pointModel();
+
+	std::vector<Particle> particles;
+	for(int i = 0; i < 5000; ++i)
+		particles.push_back(Particle(glm::vec3(0,-1,0), glm::vec3(0,0,0)));
 
 	ShaderWithTime plain;
 	plain.initialize("shaders/timemover.vert", "shaders/music.frag", 0);
+	ShaderWithMVP pointShader;
+	pointShader.initialize("shaders/plainMVP.vert", "shaders/plain.frag", 0);
 	checkGLErrors("beforemainloop");
 	float time = 0.0f;
 	float beat = 1.0f;
 	while(running)
 	{
+		tickParticles(particles, 0.01f);
 		int pos=s.getMODPosition().second;
 		time += 0.1f;
 		if((pos%16)==0) (beat<1.0f)?(beat+=0.05f):beat=1.0f;
 		else (beat>0)?beat-=0.0005f:beat=0.0f;
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		drawTimedTriangle(plain, triangle, beat);
-		//drawTimedTriangle(plain, fullScreenQuad, time);
+		//drawTimedTriangle(plain, triangle, beat);
+		drawParticles(particles, pointShader, point);
 		glfwSwapBuffers();
 		running = !glfwGetKey(GLFW_KEY_ESC) && glfwGetWindowParam(GLFW_OPENED);
 	}

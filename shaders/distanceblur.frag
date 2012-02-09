@@ -12,9 +12,9 @@ float gauss(float x, float a)
 
 void main(void)
 {
-	vFragColor = vec4(sin(time), cos(time), 0, 1);
-	vec2 relativePosition = gl_FragCoord.xy / vec2(1024, 768);
+	vFragColor = vec4(1.0);//sin(time*0.1f), cos(time*0.1f), 0, 1);
+	vec2 relativePosition = gl_FragCoord.xy / vec2(1024, 768) - vec2(0.5);
 	float dist2 = relativePosition.x*relativePosition.x + relativePosition.y*relativePosition.y;
-	float blur = gauss(1, dist2);
+	float blur = gauss(sqrt(dist2), 1);
 	vFragColor *= blur;
 }

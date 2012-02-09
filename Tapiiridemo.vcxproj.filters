@@ -18,9 +18,6 @@
     <ClCompile Include="gl3w.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="main.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="shader.c">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -28,6 +25,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="snd.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="particle.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -42,6 +45,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="snd.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="particle.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -62,6 +68,12 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="shaders\distanceblur.frag">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="shaders\music.frag">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="shaders\plainMVP.vert">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>

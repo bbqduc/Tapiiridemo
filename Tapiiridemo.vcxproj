@@ -79,23 +79,27 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="gl3w.c" />
-    <ClCompile Include="main.c" />
+    <ClCompile Include="main.cpp" />
     <ClCompile Include="model.cpp" />
     <ClCompile Include="shader.c" />
+    <ClCompile Include="particle.cpp" />
     <ClCompile Include="snd.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="bass.h" />
     <ClInclude Include="model.h" />
     <ClInclude Include="shader.h" />
+    <ClInclude Include="particle.h" />
     <ClInclude Include="snd.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\disco.frag" />
     <None Include="shaders\distanceblur.frag" />
     <None Include="shaders\moonriver.frag" />
+    <None Include="shaders\music.frag" />
     <None Include="shaders\plain.frag" />
     <None Include="shaders\plain.vert" />
+    <None Include="shaders\plainMVP.vert" />
     <None Include="shaders\timemover.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
