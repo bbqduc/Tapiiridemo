@@ -46,8 +46,6 @@ int Shader::initialize(const char* vertexPath, const char* fragmentPath, const c
 	fragmentSize = readShaderSource(fragmentPath, &fragmentSource);
 	geometrySize = readShaderSource(geometryPath, &geometrySource);
 
-	printf("vsize %d\n", vertexSize);	
-
 	GLuint v,f,g;
 
 	if(vertexSize) v = glCreateShader(GL_VERTEX_SHADER);

@@ -91,6 +91,8 @@
     <ClInclude Include="snd.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="shaders\disco.frag" />
+    <None Include="shaders\moonriver.frag" />
     <None Include="shaders\plain.frag" />
     <None Include="shaders\plain.vert" />
   </ItemGroup>

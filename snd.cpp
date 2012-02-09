@@ -42,7 +42,7 @@ unsigned int Snd::getSeconds() const
 	return BASS_ChannelBytes2Seconds(handle,getPosition());
 }
 
-int main(int argc, char** argv)
+/*int main(int argc, char** argv)
 {
 	Snd s(argv[1]);
 	s.play();
@@ -53,3 +53,4 @@ int main(int argc, char** argv)
 	}
 	return 0;
 }
+*/

@@ -38,7 +38,7 @@ vec4 s(vec2 px,float z)
 
 void main(void)
 {
-	vec2 resolution = vec2(300.0, 300.0);
+	vec2 resolution = vec2(1024.0, 768.0);
 	vec2 p = -1.0 + 2.0 * gl_FragCoord.xy / resolution.xy;
 	vec4 c = vec4(0.0);
 	for(int i=80;i>0;i--)

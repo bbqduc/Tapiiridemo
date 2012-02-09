@@ -6,7 +6,6 @@
 #include "shader.h"
 #include "model.h"
 
-
 void checkGLErrors(const char* functionName){
 	GLenum err = glGetError();
 	if(err != GL_NO_ERROR)
@@ -27,7 +26,7 @@ int init()
 	glfwOpenWindowHint(GLFW_OPENGL_VERSION_MINOR, 2);
 	glfwOpenWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 	glfwOpenWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-	if(!glfwOpenWindow(300,300,0,0,0,0,0,0, GLFW_WINDOW))
+	if(!glfwOpenWindow(1024,768,0,0,0,0,0,0, GLFW_WINDOW))
 	{
 		glfwTerminate();
 		return -1;
@@ -73,18 +72,13 @@ void drawTimedTriangle(const ShaderWithTime& shader, const Model& triangle, floa
 	glUniform1f(shader.timeLocation, time);
 	glBindVertexArray(triangle.VAO_id);
 
-	glEnableVertexAttribArray(0);
-
 	glBindBuffer(GL_ARRAY_BUFFER, triangle.VBO_vertices_id);
-	glVertexAttribPointer(0, triangle.numVertices, GL_FLOAT, GL_FALSE, 0, 0);
+	glDrawElements(triangle.drawMode, triangle.numPolygons*3, GL_UNSIGNED_INT, 0);
 
-	glDrawArrays(GL_TRIANGLES, 0, triangle.numVertices);
-
-	glDisableVertexAttribArray(0);
 	glBindVertexArray(0);
 	glUseProgram(0);
 
-	checkGLErrors("drawSimpleTriangle");
+	checkGLErrors("drawTimedTriangle");
 }
 
 int main()
@@ -101,18 +95,29 @@ int main()
 
 	glm::uvec3 polygons(0,1,2);
 
+	glm::vec3 vertices2[4];
+	vertices2[0] = glm::vec3(-1.0f, -1.0f, 0.0f);
+	vertices2[1] = glm::vec3(-1.0f, 1.0f, 0.0f);
+	vertices2[2] = glm::vec3(1.0f, 1.0f, 0.0f);
+	vertices2[3] = glm::vec3(1.0f, -1.0f, 0.0f);
+
+	glm::uvec3 polygons2[2];
+	polygons2[0] = glm::uvec3(0,1,2);
+	polygons2[1] = glm::uvec3(2,3,0);
+
 	Model triangle(3, 1, &vertices[0], &polygons, GL_TRIANGLES);
+	Model fullScreenQuad(4,2, &vertices2[0], &polygons2[0], GL_TRIANGLES);
 	printf("OpenGL version %s, GLSL %s\n", glGetString(GL_VERSION), glGetString(GL_SHADING_LANGUAGE_VERSION));
 
 	ShaderWithTime plain;
-	plain.initialize(0, "shaders/disco.frag", 0);
+	plain.initialize("shaders/plain.vert", "shaders/moonriver.frag", 0);
 	checkGLErrors("beforemainloop");
 	float time = 0.0f;
 	while(running)
 	{
-		time += 0.001f;
+		time += 0.1f;
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		drawTimedTriangle(plain, triangle, time);
+		drawTimedTriangle(plain, fullScreenQuad, time);
 		glfwSwapBuffers();
 		running = !glfwGetKey(GLFW_KEY_ESC) && glfwGetWindowParam(GLFW_OPENED);
 	}

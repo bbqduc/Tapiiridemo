@@ -52,5 +52,11 @@
     <None Include="shaders\plain.vert">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="shaders\disco.frag">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="shaders\moonriver.frag">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
 </Project>
