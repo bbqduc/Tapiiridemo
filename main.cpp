@@ -79,7 +79,7 @@ void drawTimedTriangle(const ShaderWithTime& shader, const Model& triangle, floa
 	checkGLErrors("drawTimedTriangle");
 }
 
-void drawParticle(const ShaderWithMVP& shader, const Particle& particle, const Model& point, float time)
+void drawParticle(const ShaderWithMVP& shader, const Particle& particle, const Model& point, float time, int pos)
 {
 	glm::mat4 perspective = glm::perspective(45.0f, 1024.0f/768.0f, 1.0f, 1000.0f);
 	glm::mat4 MVP = glm::translate(glm::mat4(), particle.position);
@@ -89,6 +89,8 @@ void drawParticle(const ShaderWithMVP& shader, const Particle& particle, const M
 	glm::mat4 result = perspective * MVP * cam;
 
 	glUseProgram(shader.id);
+	glUniform1f(shader.timelocation, time);
+	glUniform1i(shader.colorpos, pos);
 	glUniformMatrix4fv(shader.MVPLocation, 1, GL_FALSE, glm::value_ptr(result));
 
 	glBindVertexArray(point.VAO_id);
@@ -122,12 +124,12 @@ void tickParticles(std::list<Particle>& particles, GLfloat dt)
 	}
 }
 
-void drawParticles(const std::list<Particle>& particles, const ShaderWithMVP& shader, Model& point, float time)
+void drawParticles(const std::list<Particle>& particles, const ShaderWithMVP& shader, Model& point, float time, int pos)
 {	
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	for(auto i = particles.begin(); i != particles.end(); ++i)
-		drawParticle(shader, *i, point, time);
+		drawParticle(shader, *i, point, time, pos);
 	glDisable(GL_BLEND);
 }
 
@@ -197,19 +199,32 @@ int main()
 	pointShader.initialize("shaders/plainMVP.vert", "shaders/plain.frag", "shaders/pointToSquare.geom");
 	checkGLErrors("beforemainloop");
 	float time = 0.0f;
+	int pos=0;
+	bool herp=false;
 	while(running)
 	{
+		if(s.get4th())
+		{
+			if(herp)
+			{
+				emitParticles(particles, 100);
+				pos++;
+				herp=false;
+			}
+		}
+		else herp=true;
+
 		tickParticles(particles, 0.01f);
 		time += 0.1f;
-		if(s.get4th())
-			emitParticles(particles, 100);
+			
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		//drawTimedTriangle(plain, triangle, beat);
-		drawParticles(particles, pointShader, point, time);
+		drawParticles(particles, pointShader, point, s.get4th(), pos%3);
 		//drawPulsingTriangle(plain, triangle, beat);
 		//drawTimedTriangle(plain, fullScreenQuad, time);
 		glfwSwapBuffers();
 		running = !glfwGetKey(GLFW_KEY_ESC) && glfwGetWindowParam(GLFW_OPENED);
+
 	}
 
 	glfwTerminate();

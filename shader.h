@@ -23,6 +23,8 @@ struct ShaderWithTime : public Shader
 struct ShaderWithMVP : public Shader
 {
 	GLint MVPLocation;
+	GLint timelocation;
+	GLint colorpos;
 	int initialize(const char* vertexPath, const char* fragmentPath, const char* geometryPath);
 };
 
