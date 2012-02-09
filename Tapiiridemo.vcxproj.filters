@@ -58,5 +58,11 @@
     <None Include="shaders\moonriver.frag">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="shaders\timemover.vert">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="shaders\distanceblur.frag">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
 </Project>
