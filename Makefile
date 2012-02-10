@@ -1,8 +1,8 @@
 ###############################
 # Update sources & headers here
 
-SRC=shader.cpp model.cpp snd.cpp particle.cpp glutils.cpp
-HEADERS=shader.h model.h snd.h particle.h glutils.h
+SRC=shader.cpp model.cpp snd.cpp particle.cpp glutils.cpp concurrency.cpp
+HEADERS=shader.h model.h snd.h particle.h glutils.h concurrency.h
 MAIN=main.cpp
 EXENAME=main
 

@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <list>
 #include <ctime>
+#include <cmath>
 #include <cstdlib>
 
 #include "glutils.h"
@@ -84,10 +85,10 @@ void drawParticle(const ShaderWithMVP& shader, const Particle& particle, const M
 {
 	glm::mat4 perspective = glm::perspective(45.0f, 1024.0f/768.0f, 1.0f, 1000.0f);
 	glm::mat4 MVP = glm::translate(glm::mat4(), particle.position);
-	glm::mat4 rotate = glm::rotate(glm::mat4(), time, glm::vec3(0.0f, 1.0f, 0.0f));
+	glm::mat4 rotate = glm::rotate(glm::mat4(), (float)sin(time/20)*(float)cos(time/20)*360.0f, glm::vec3(sin(time/20), cos(time/20), (sin(time/20)*cos(time/20))/2));
 	glm::mat4 cam = glm::translate(glm::mat4(), glm::vec3(0.0f, 0.0f, -5.0f));
 
-	glm::mat4 result = perspective * MVP * cam;
+	glm::mat4 result = perspective * cam * rotate * MVP;
 
 	glUseProgram(shader.id);
 	glUniform1f(shader.timelocation, time);
@@ -116,7 +117,7 @@ void tickParticles(std::list<Particle>& particles, GLfloat dt)
 {
 	for(auto i = particles.begin(); i != particles.end();)
 	{
-		if(i->position.y < -5.0f)
+		if(i->timeLeft < 0.0f)
 		{
 			auto j = i; ++i; particles.erase(j, i);
 		}
@@ -208,7 +209,7 @@ int main()
 		{
 			if(herp)
 			{
-				emitParticles(particles, 100);
+				emitParticles(particles, 50);
 				pos++;
 				herp=false;
 			}
@@ -220,7 +221,7 @@ int main()
 			
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		//drawTimedTriangle(plain, triangle, beat);
-		drawParticles(particles, pointShader, point, s.get4th(), pos%3);
+		drawParticles(particles, pointShader, point, time, pos%3);
 		//drawPulsingTriangle(plain, triangle, beat);
 		//drawTimedTriangle(plain, fullScreenQuad, time);
 		glfwSwapBuffers();

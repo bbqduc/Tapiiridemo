@@ -5,7 +5,6 @@ Particle::Particle(const glm::vec3& initialPosition, const glm::vec3& initialVel
 	velocity(initialVelocity),
 	acceleration(initialAcceleration)
 {
-	timeLeft = 100.0f;
 }
 
 
@@ -19,5 +18,7 @@ void Particle::tick(GLfloat dt)
 void Particle::randomize()
 {
 	position = glm::vec3(0.0f);
-	velocity = glm::vec3((rand()%50-25)/10.0f, 4.0f+(rand()%30-15)/10.0f, (rand()%50-25)/10.0f);
+	velocity = glm::vec3((rand()%50-25)/10.0f, (rand()%50-25)/10.0f,/*4.0f+(rand()%30-15)/10.0f,*/ (rand()%50-25)/10.0f);
+	acceleration = glm::vec3((rand()%50-25)/10.0f, (rand()%50-25)/10.0f,/*4.0f+(rand()%30-15)/10.0f,*/ (rand()%50-25)/10.0f);
+	timeLeft = 3.3f;
 }
