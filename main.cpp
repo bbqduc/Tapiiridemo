@@ -31,6 +31,7 @@ int init()
 	glfwOpenWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	if(!glfwOpenWindow(1024,768,0,0,0,0,0,0, GLFW_WINDOW))
 	{
+		printf("Cannot open window!\n");
 		glfwTerminate();
 		return -1;
 	}
