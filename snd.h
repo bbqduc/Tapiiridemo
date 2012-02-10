@@ -34,8 +34,19 @@ class SoundInitializer
 class Snd
 {
 	private:
+		typedef void(*t_SyncFunc)(void*);
 		int handle;
 		void err(const std::string& msg);
+
+		static void SyncInit(int, int, int, void*);
+		struct SyncData
+		{
+			SyncData() : m_Func(NULL), m_Arg(NULL) {}
+			SyncData(t_SyncFunc f, void* a) : m_Func(f), m_Arg(a) {}
+			t_SyncFunc 	m_Func;
+			void*		m_Arg;
+		};
+		SyncData data;
 	public:
 		Snd();
 		Snd(const std::string& file);

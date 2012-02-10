@@ -216,6 +216,9 @@ void listentomusic(void* args)
 
 int main()
 {
+	Snd s;
+	s.load("test.xm");
+	/*
 	srand(time(0));
 	int running = GL_TRUE;
 
@@ -257,5 +260,6 @@ int main()
 	}
 	music.M_Join();
 	glfwTerminate();
+	*/
 	exit(EXIT_SUCCESS);
 }

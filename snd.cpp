@@ -68,6 +68,17 @@ bool Snd::getCustom(unsigned int position) const
 {
 	return (((BASS_ChannelGetPosition(handle,BASS_POS_MUSIC_ORDER))>>16)%position)==0;
 }
+
+static void SyncInit(int handle, int channel, int data, void* user)
+{
+}
+
+void Snd::syncPosition(t_SyncFunc f, short order, short row, void* args)
+{
+	unsigned int type=((row<<16)|order);
+	data = SyncData(f, args);
+	BASS_ChannelSetSync(handle, BASS_SYNC_MUSICPOS, type, SyncInit, &data);
+}
 /*
 int main(int argc, char** argv)
 {
