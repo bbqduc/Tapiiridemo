@@ -200,7 +200,7 @@ int main()
 	pointShader.initialize("shaders/plainMVP.vert", "shaders/plain.frag", "shaders/pointToSquare.geom");
 	checkGLErrors("beforemainloop");
 	float time = 0.0f;
-	int pos=0;
+	unsigned int pos=0;
 	bool herp=false;
 	while(running)
 	{
@@ -225,7 +225,7 @@ int main()
 		//drawTimedTriangle(plain, fullScreenQuad, time);
 		glfwSwapBuffers();
 		running = !glfwGetKey(GLFW_KEY_ESC) && glfwGetWindowParam(GLFW_OPENED);
-
+		glfwSleep(0.01);
 	}
 
 	glfwTerminate();
