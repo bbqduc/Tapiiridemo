@@ -181,23 +181,23 @@ void drawPulsingTriangle(const ShaderWithTime& shader, const Model& triangle, fl
 struct threaddata
 {
 	C_Mutex* mtx;
-	bool* stop;
+	int* running;
 	std::list<Particle>* particles;
-	unsigned int* pos;
+	int* pos;
 };
 
 void listentomusic(void* args)
 {
 	threaddata* d=(threaddata*)args;
-	bool* stop=d->stop;
-	unsigned int* pos=d->pos;
+	int* running=d->running;
+	int* pos=d->pos;
 	C_Mutex* mtx=d->mtx;
 	std::list<Particle>& particles=*(d->particles);
 	Snd s;
 	s.loadMOD("test.xm");
 	s.play();
 	bool herp=false;
-	while(!*stop)
+	while(*running)
 	{
 		if(s.get4th())
 		{
@@ -205,14 +205,13 @@ void listentomusic(void* args)
 			{
 				mtx->M_Lock();
 				emitParticles(particles, 50);
-				*pos++;
+				(*pos)++;
 				mtx->M_Unlock();
 				herp=false;
 			}
 		}
 		else herp=true;
 	}
-	//s.stop();
 }
 
 int main()
@@ -235,11 +234,10 @@ int main()
 	ShaderWithMVP pointShader;
 	pointShader.initialize("shaders/plainMVP.vert", "shaders/plain.frag", "shaders/pointToSquare.geom");
 	checkGLErrors("beforemainloop");
-	bool stop=false;
 	float time = 0.0f;
-	unsigned int pos=0;
+	int pos=0;
 	C_Mutex mtx;
-	threaddata d={&mtx, &stop, &particles, &pos};
+	threaddata d={&mtx, &running, &particles, &pos};
 	C_Thread music(listentomusic, &d);
 	while(running)
 	{
@@ -250,14 +248,13 @@ int main()
 			
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		//drawTimedTriangle(plain, triangle, beat);
-		drawParticles(particles, pointShader, point, time, pos%3);
+		drawParticles(particles, pointShader, point, time, (pos%3));
 		//drawPulsingTriangle(plain, triangle, beat);
 		//drawTimedTriangle(plain, fullScreenQuad, time);
 		glfwSwapBuffers();
 		running = !glfwGetKey(GLFW_KEY_ESC) && glfwGetWindowParam(GLFW_OPENED);
 		glfwSleep(0.01);
 	}
-	stop=true;
 	music.M_Join();
 	glfwTerminate();
 	exit(EXIT_SUCCESS);
