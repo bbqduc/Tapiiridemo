@@ -15,6 +15,7 @@
 #include "particle.h"
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include "concurrency.h"
 
 
 
@@ -177,12 +178,46 @@ void drawPulsingTriangle(const ShaderWithTime& shader, const Model& triangle, fl
 	glDisable(GL_BLEND);
 }
 
-int main()
+struct threaddata
 {
-	srand(time(0));
+	C_Mutex* mtx;
+	bool* stop;
+	std::list<Particle>* particles;
+	unsigned int* pos;
+};
+
+void listentomusic(void* args)
+{
+	threaddata* d=(threaddata*)args;
+	bool* stop=d->stop;
+	unsigned int* pos=d->pos;
+	C_Mutex* mtx=d->mtx;
+	std::list<Particle>& particles=*(d->particles);
 	Snd s;
 	s.loadMOD("test.xm");
 	s.play();
+	bool herp=false;
+	while(!*stop)
+	{
+		if(s.get4th())
+		{
+			if(herp)
+			{
+				mtx->M_Lock();
+				emitParticles(particles, 50);
+				*pos++;
+				mtx->M_Unlock();
+				herp=false;
+			}
+		}
+		else herp=true;
+	}
+	//s.stop();
+}
+
+int main()
+{
+	srand(time(0));
 	int running = GL_TRUE;
 
 	if(init())
@@ -200,23 +235,17 @@ int main()
 	ShaderWithMVP pointShader;
 	pointShader.initialize("shaders/plainMVP.vert", "shaders/plain.frag", "shaders/pointToSquare.geom");
 	checkGLErrors("beforemainloop");
+	bool stop=false;
 	float time = 0.0f;
 	unsigned int pos=0;
-	bool herp=false;
+	C_Mutex mtx;
+	threaddata d={&mtx, &stop, &particles, &pos};
+	C_Thread music(listentomusic, &d);
 	while(running)
 	{
-		if(s.get4th())
-		{
-			if(herp)
-			{
-				emitParticles(particles, 50);
-				pos++;
-				herp=false;
-			}
-		}
-		else herp=true;
-
+		mtx.M_Lock();
 		tickParticles(particles, 0.01f);
+		mtx.M_Unlock();
 		time += 0.1f;
 			
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -228,7 +257,8 @@ int main()
 		running = !glfwGetKey(GLFW_KEY_ESC) && glfwGetWindowParam(GLFW_OPENED);
 		glfwSleep(0.01);
 	}
-
+	stop=true;
+	music.M_Join();
 	glfwTerminate();
 	exit(EXIT_SUCCESS);
 }
