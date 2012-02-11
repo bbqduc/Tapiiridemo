@@ -81,6 +81,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="concurrency.cpp" />
     <ClCompile Include="gl3w.c" />
     <ClCompile Include="glutils.cpp" />
     <ClCompile Include="main.cpp" />
@@ -91,6 +92,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="bass.h" />
+    <ClInclude Include="concurrency.h" />
     <ClInclude Include="glutils.h" />
     <ClInclude Include="model.h" />
     <ClInclude Include="particleemitter.h" />
