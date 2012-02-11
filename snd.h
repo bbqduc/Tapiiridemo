@@ -38,7 +38,11 @@ class Snd
 		int handle;
 		void err(const std::string& msg);
 
-		static void SyncInit(uint32_t, uint32_t, uint32_t, void*);
+		#ifdef _WIN32
+			static void __stdcall SyncInit(uint32_t, uint32_t, uint32_t, void*);
+		#else
+			static void SyncInit(uint32_t, uint32_t, uint32_t, void*);
+		#endif
 		struct SyncData
 		{
 			SyncData() : syncfunc(NULL), args(NULL) {}

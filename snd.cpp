@@ -48,11 +48,20 @@ unsigned int Snd::getSeconds() const
 {
 	return BASS_ChannelBytes2Seconds(handle,getPosition());
 }
-void Snd::SyncInit(uint32_t handle, uint32_t channel, uint32_t data, void* user)
-{
-	SyncData* d = (SyncData*)user;
-	d->syncfunc(d->args);
-}
+
+#ifdef _WIN32
+	void __stdcall Snd::SyncInit(uint32_t handle, uint32_t channel, uint32_t data, void* user)
+	{
+		SyncData* d = (SyncData*)user;
+		d->syncfunc(d->args);
+	}
+#else
+	void Snd::SyncInit(uint32_t handle, uint32_t channel, uint32_t data, void* user)
+	{
+		SyncData* d = (SyncData*)user;
+		d->syncfunc(d->args);
+	}
+#endif
 
 void Snd::syncPosition(t_SyncFunc f, unsigned short order, unsigned short row, void* args)
 {
