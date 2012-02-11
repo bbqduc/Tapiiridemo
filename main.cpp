@@ -35,7 +35,7 @@ int init()
 	glfwOpenWindowHint(GLFW_OPENGL_VERSION_MINOR, 2);
 	glfwOpenWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 	glfwOpenWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-	if(!glfwOpenWindow(1440,900,0,0,0,0,0,0, GLFW_FULLSCREEN))
+	if(!glfwOpenWindow(1024,768,0,0,0,0,0,0, GLFW_WINDOW))
 	{
 		printf("Cannot open window!\n");
 		glfwTerminate();
