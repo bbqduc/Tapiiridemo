@@ -50,8 +50,9 @@ unsigned int Snd::getSeconds() const
 }
 
 #ifdef _WIN32
-	void __stdcall Snd::SyncInit(uint32_t handle, uint32_t channel, uint32_t data, void* user)
+	void __stdcall Snd::SyncInit(HSYNC handle, DWORD channel, DWORD data, void* user)
 	{
+		SYNCPROC asd;
 		SyncData* d = (SyncData*)user;
 		d->syncfunc(d->args);
 	}
