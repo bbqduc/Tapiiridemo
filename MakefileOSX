@@ -8,17 +8,17 @@ EXENAME=main
 
 ###############################
 
-CC=g++
+CC=clang++
 CCFLAGS=-Wall -Wextra -std=c++0x -DGLM_FORCE_CXX11 -O3
 INCLUDE=-Iglfw/include
-LIBS=-Lglfw/lib/x11 -lglfw -lGLU -lbass -L.
+LIBS=-Lglfw/lib/cocoa -lglfw -lbass -L. -framework OpenGL -framework Cocoa
 OBJ=$(SRC:.cpp=.o)
 
 all: $(MAIN) $(OBJ) gl3w.o
 	$(CC) $(CCFLAGS) -Wl,-rpath,glfw/lib/x11,-rpath,. $(LIBS) $(MAIN) $(INCLUDE) $(OBJ) -o $(EXENAME) gl3w.o
 $(OBJ) : $(SRC) $(HEADERS)
 %.o : %.cpp
-	$(CC) $(CCFLAGS) -c -MMD $< -o $@ $(INCLUDE) $(LIBS)
+	$(CC) $(CCFLAGS) -c -MMD $< -o $@ $(INCLUDE)
 gl3w.o : gl3w.c
 	$(CC) -c $< $(INCLUDE) -fpermissive
 clean:
