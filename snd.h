@@ -1,5 +1,6 @@
 #pragma once
 #include <iostream>
+#include <stdint.h>
 #include <sstream>
 #include "bass.h"
 
@@ -39,7 +40,7 @@ class Snd
 		void err(const std::string& msg);
 
 		#ifdef _WIN32
-			static void __stdcall SyncInit(uint32_t, uint32_t, uint32_t, void*);
+			static void __stdcall SyncInit(HSYNC handle, DWORD channel, DWORD data, void* user);
 		#else
 			static void SyncInit(uint32_t, uint32_t, uint32_t, void*);
 		#endif
