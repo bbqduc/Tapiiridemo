@@ -38,14 +38,15 @@ class Snd
 		int handle;
 		void err(const std::string& msg);
 
-		static void SyncInit(int, int, int, void*);
+		static void SyncInit(uint32_t, uint32_t, uint32_t, void*);
 		struct SyncData
 		{
-			SyncData() : m_Func(NULL), m_Arg(NULL) {}
-			SyncData(t_SyncFunc f, void* a) : m_Func(f), m_Arg(a) {}
-			t_SyncFunc 	m_Func;
-			void*		m_Arg;
+			SyncData() : syncfunc(NULL), args(NULL) {}
+			SyncData(t_SyncFunc f, void* a) : syncfunc(f), args(a) {}
+			t_SyncFunc 	syncfunc;
+			void*		args;
 		};
+
 		SyncData data;
 	public:
 		Snd();
@@ -62,4 +63,5 @@ class Snd
 		bool get16th() const;
 		bool getMeasure() const;
 		bool getCustom(unsigned int position) const;
+		void syncPosition(t_SyncFunc f, unsigned short order, unsigned short row, void* args);
 };

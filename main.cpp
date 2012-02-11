@@ -190,39 +190,36 @@ struct threaddata
 	int* pos;
 };
 
+void sync(void* args)
+{
+	C_CondVar* c=(C_CondVar*)args;
+	c->M_Signal();
+}
+
 void listentomusic(void* args)
 {
 	threaddata* d=(threaddata*)args;
 	int* running=d->running;
 	int* pos=d->pos;
 	C_Mutex* mtx=d->mtx;
+	C_CondVar c;
 	std::list<Particle>& particles=*(d->particles);
 	Snd s;
 	s.loadMOD("test.xm");
+	for(int i=0; i<64; i+=8) s.syncPosition(sync, -1, i, &c);
 	s.play();
-	bool herp=false;
 	while(*running)
 	{
-		if(s.get4th())
-		{
-			if(herp)
-			{
-				mtx->M_Lock();
-				emitParticles(particles, 50);
-				(*pos)++;
-				mtx->M_Unlock();
-				herp=false;
-			}
-		}
-		else herp=true;
+		c.M_Wait();
+		mtx->M_Lock();
+		emitParticles(particles, 50);
+		(*pos)++;
+		mtx->M_Unlock();
 	}
 }
 
 int main()
 {
-	Snd s;
-	s.load("test.xm");
-	/*
 	srand(time(0));
 	int running = GL_TRUE;
 
@@ -264,6 +261,5 @@ int main()
 	}
 	music.M_Join();
 	glfwTerminate();
-	*/
 	exit(EXIT_SUCCESS);
 }
