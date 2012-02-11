@@ -34,8 +34,20 @@ class SoundInitializer
 class Snd
 {
 	private:
+		typedef void(*t_SyncFunc)(void*);
 		int handle;
 		void err(const std::string& msg);
+
+		static void SyncInit(uint32_t, uint32_t, uint32_t, void*);
+		struct SyncData
+		{
+			SyncData() : syncfunc(NULL), args(NULL) {}
+			SyncData(t_SyncFunc f, void* a) : syncfunc(f), args(a) {}
+			t_SyncFunc 	syncfunc;
+			void*		args;
+		};
+
+		SyncData data;
 	public:
 		Snd();
 		Snd(const std::string& file);
@@ -51,4 +63,5 @@ class Snd
 		bool get16th() const;
 		bool getMeasure() const;
 		bool getCustom(unsigned int position) const;
+		void syncPosition(t_SyncFunc f, unsigned short order, unsigned short row, void* args);
 };

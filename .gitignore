@@ -1,6 +1,9 @@
 glfw/lib/
+glfw/examples/*
+glfw/tests/*
 *.o
 *.swp
+*.dylib
 main
 *.d
 *.so

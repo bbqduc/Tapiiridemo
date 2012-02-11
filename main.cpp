@@ -1,6 +1,10 @@
 #include <GL3/gl3w.h>
 #include <GL/glfw.h>
-#include <GL/gl.h>
+#ifdef __APPLE__
+	#include <OpenGL/gl.h>
+#else
+	#include <GL/gl.h>
+#endif
 #include <stdlib.h>
 #include <stdio.h>
 #include <list>
@@ -87,7 +91,7 @@ void drawParticle(const ShaderWithMVP& shader, const Particle& particle, const M
 	glm::mat4 perspective = glm::perspective(45.0f, 1024.0f/768.0f, 1.0f, 1000.0f);
 	glm::mat4 MVP = glm::translate(glm::mat4(), particle.position);
 	glm::mat4 rotate = glm::rotate(glm::mat4(), (float)sin(time/20)*(float)cos(time/20)*360.0f, glm::vec3(sin(time/20), cos(time/20), (sin(time/20)*cos(time/20))/2));
-	glm::mat4 cam = glm::translate(glm::mat4(), glm::vec3(0.0f, 0.0f, -5.0f));
+	glm::mat4 cam = glm::translate(glm::mat4(), glm::vec3(0.0f, 0.0f, -((sin(time/10)+2.0f)*6.0f)));
 
 	glm::mat4 result = perspective * cam * rotate * MVP;
 
@@ -186,31 +190,31 @@ struct threaddata
 	int* pos;
 };
 
+void sync(void* args)
+{
+	C_CondVar* c=(C_CondVar*)args;
+	c->M_Signal();
+}
+
 void listentomusic(void* args)
 {
 	threaddata* d=(threaddata*)args;
 	int* running=d->running;
 	int* pos=d->pos;
 	C_Mutex* mtx=d->mtx;
+	C_CondVar c;
 	std::list<Particle>& particles=*(d->particles);
 	Snd s;
 	s.loadMOD("test.xm");
+	for(int i=0; i<64; i+=8) s.syncPosition(sync, -1, i, &c);
 	s.play();
-	bool herp=false;
 	while(*running)
 	{
-		if(s.get4th())
-		{
-			if(herp)
-			{
-				mtx->M_Lock();
-				emitParticles(particles, 50);
-				(*pos)++;
-				mtx->M_Unlock();
-				herp=false;
-			}
-		}
-		else herp=true;
+		c.M_Wait();
+		mtx->M_Lock();
+		emitParticles(particles, 40);
+		(*pos)++;
+		mtx->M_Unlock();
 	}
 }
 

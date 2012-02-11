@@ -48,25 +48,17 @@ unsigned int Snd::getSeconds() const
 {
 	return BASS_ChannelBytes2Seconds(handle,getPosition());
 }
-bool Snd::get4th() const
+void Snd::SyncInit(uint32_t handle, uint32_t channel, uint32_t data, void* user)
 {
-	return (((BASS_ChannelGetPosition(handle,BASS_POS_MUSIC_ORDER))>>16)%16)==0;
+	SyncData* d = (SyncData*)user;
+	d->syncfunc(d->args);
 }
-bool Snd::get8th() const
+
+void Snd::syncPosition(t_SyncFunc f, unsigned short order, unsigned short row, void* args)
 {
-	return (((BASS_ChannelGetPosition(handle,BASS_POS_MUSIC_ORDER))>>16)%8)==0;
-}
-bool Snd::get16th() const
-{
-	return (((BASS_ChannelGetPosition(handle,BASS_POS_MUSIC_ORDER))>>16)%4)==0;
-}
-bool Snd::getMeasure() const
-{
-	return (((BASS_ChannelGetPosition(handle,BASS_POS_MUSIC_ORDER))>>16))==0;
-}
-bool Snd::getCustom(unsigned int position) const
-{
-	return (((BASS_ChannelGetPosition(handle,BASS_POS_MUSIC_ORDER))>>16)%position)==0;
+	uint32_t type=((row<<16)|order);
+	data = SyncData(f, args);
+	BASS_ChannelSetSync(handle, BASS_SYNC_MUSICPOS, type, SyncInit, &data);
 }
 /*
 int main(int argc, char** argv)

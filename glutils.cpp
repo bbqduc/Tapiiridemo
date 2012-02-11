@@ -1,7 +1,11 @@
 #include "glutils.h"
 #include <cstdio>
-#include <GL/glu.h>
 #include <cstdlib>
+#ifdef __APPLE__
+	#include <OpenGL/glu.h>
+#else
+	#include <GL/glu.h>
+#endif
 
 void checkGLErrors(const char* functionName)
 {
