@@ -91,7 +91,7 @@ void drawParticle(const ShaderWithMVP& shader, const Particle& particle, const M
 	glm::mat4 perspective = glm::perspective(45.0f, 1024.0f/768.0f, 1.0f, 1000.0f);
 	glm::mat4 MVP = glm::translate(glm::mat4(), particle.position);
 	glm::mat4 rotate = glm::rotate(glm::mat4(), (float)sin(time/20)*(float)cos(time/20)*360.0f, glm::vec3(sin(time/20), cos(time/20), (sin(time/20)*cos(time/20))/2));
-	glm::mat4 cam = glm::translate(glm::mat4(), glm::vec3(0.0f, 0.0f, -5.0f));
+	glm::mat4 cam = glm::translate(glm::mat4(), glm::vec3(0.0f, 0.0f, -((sin(time/10)+2.0f)*6.0f)));
 
 	glm::mat4 result = perspective * cam * rotate * MVP;
 
@@ -212,7 +212,7 @@ void listentomusic(void* args)
 	{
 		c.M_Wait();
 		mtx->M_Lock();
-		emitParticles(particles, 50);
+		emitParticles(particles, 40);
 		(*pos)++;
 		mtx->M_Unlock();
 	}
