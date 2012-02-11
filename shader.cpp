@@ -1,7 +1,8 @@
 #include "shader.h"
 #include <string.h>
+#include <iostream>
 #include "glutils.h"
-
+	
 void printShaderInfoLog(GLint shader)
 {
 	int infoLogLen = 0;
@@ -18,6 +19,41 @@ void printShaderInfoLog(GLint shader)
 		printf("InfoLog:\n%s\n", infoLog);
 		free(infoLog);
 	}
+}
+
+Framebuffer::Framebuffer(unsigned int w, unsigned int h)
+{
+	glActiveTexture(GL_TEXTURE0);
+	glGenTextures(1, &fbo_texture);
+	glBindTexture(GL_TEXTURE_2D, fbo_texture);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	glGenRenderbuffers(1, &rbo_depth);
+	glBindRenderbuffer(GL_RENDERBUFFER, rbo_depth);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, w, h); // width&height
+
+	glGenFramebuffers(1, &fb);
+	glBindFramebuffer(GL_FRAMEBUFFER, fb);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, fbo_texture, 0);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rbo_depth);
+	GLenum status;
+	if((status=glCheckFramebufferStatus(GL_FRAMEBUFFER)) != GL_FRAMEBUFFER_COMPLETE)
+	{
+		std::cerr << "Framebuffer incomplete :<, status: " << status << std::endl;
+	}
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	glGenBuffers(1, &vertices);
+	glBindBuffer(GL_ARRAY_BUFFER, vertices);
+	GLfloat fbo_vertices[8]={-1,-1, 1,-1, -1,-1, 1,1};
+	glBufferData(GL_ARRAY_BUFFER, sizeof(fbo_vertices), fbo_vertices, GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	initialized=true;
 }
 
 GLint Shader::readShaderSource(const char* path, GLchar** target)

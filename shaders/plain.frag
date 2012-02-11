@@ -23,7 +23,7 @@ void main(void)
 	dist *= 100;
 	float mul = 1.0-dist;
 
-	vFragColor = vec4(mul*(2.5-pos)*abs(relativePosition.x)*abs(sin(time)), mul*(3.5-pos)*abs(relativePosition.y), mul*(pos+0.5)*abs(relativePosition.x+relativePosition.y), 1.0-dist);;
+	vFragColor = vec4(mul*(2.5-pos)*abs(relativePosition.x)*abs(sin(time)), mul*(3.5-pos)*abs(relativePosition.y), mul*(pos+0.5)*abs(relativePosition.x+relativePosition.y), 1.0-dist);
 
 /*	if(pos==0)
 		vFragColor = vec4(mul * relativePosition.x * time, mul * relativePosition.y, mul * abs(relativePosition.x+relativePosition.y), 1.0-dist);

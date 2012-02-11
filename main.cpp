@@ -177,6 +177,7 @@ Model fullScreenQuadModel()
 void drawPulsingTriangle(const ShaderWithTime& shader, const Model& triangle, float beat)
 {
 	glEnable(GL_BLEND);
+	glEnable(GL_DEPTH_TEST);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	drawTimedTriangle(shader, triangle, beat);
 	glDisable(GL_BLEND);
@@ -218,6 +219,18 @@ void listentomusic(void* args)
 	}
 }
 
+void drawFramebuffer(const Framebuffer& fb, const Shader& shader, const Model& model)
+{
+	glUseProgram(shader.id);
+	glBindTexture(fb.fbo_texture);
+	glUniform1i(shader.texturepos);
+	glEnableVertexAttribArray(model.VAO_id);
+	glBindBuffer(GL_ARRAY_BUFFER, model.VBO_vertices_id);
+	glDrawElements(model.drawMode, model.numPolygons*3, GL_UNSIGNED_INT, 0);
+	glBindVertexArray(0);
+	glUseProgram(0);
+}
+
 int main()
 {
 	srand(time(0));
@@ -243,6 +256,8 @@ int main()
 	C_Mutex mtx;
 	threaddata d={&mtx, &running, &particles, &pos};
 	C_Thread music(listentomusic, &d);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	Framebuffer postprocessing(1024, 768);
 	while(running)
 	{
 		mtx.M_Lock();
@@ -252,7 +267,10 @@ int main()
 			
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		//drawTimedTriangle(plain, triangle, beat);
+		glBindFramebuffer(GL_FRAMEBUFFER, Framebuffer.fbo);
 		drawParticles(particles, pointShader, point, time, (pos%3));
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		drawFramebuffer(Framebuffer, ShaderWithTime, fullScreenQuad);
 		//drawPulsingTriangle(plain, triangle, beat);
 		//drawTimedTriangle(plain, fullScreenQuad, time);
 		glfwSwapBuffers();

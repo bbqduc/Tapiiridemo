@@ -28,18 +28,27 @@ struct ShaderWithMVP : public Shader
 	int initialize(const char* vertexPath, const char* fragmentPath, const char* geometryPath);
 };
 
+struct Framebuffer
+{
+	bool initialized;
+	GLuint fb;
+	GLuint fbo_texture;
+	GLuint rbo_depth;
+	GLuint vertices;
+	Framebuffer() : initialized(false), fb(0), fbo_texture(0), rbo_depth(0), vertices(0) {}
+	Framebuffer(unsigned int w, unsigned int h);
+	~Framebuffer()
+	{
+		if(initialized)
+		{
+			glDeleteRenderbuffers(1, &rbo_depth);
+			glDeleteTextures(1, &fbo_texture);
+			glDeleteFramebuffers(1, &fb);
+			glDeleteBuffers(1, &vertices);
+		}
+	}
+};
+
 void printShaderInfoLog(GLint shader);
-
-
-
-
-
-
-
-
-
-
-
-
 
 #endif
