@@ -182,3 +182,11 @@ int ShaderWithMVP::initialize(const char* vertexPath, const char* fragmentPath, 
 	colorpos = glGetUniformLocation(id, "pos");
 	return 0;
 }
+
+int ShaderPostProcessing::initialize(const char* vertexPath, const char* fragmentPath, const char* geometryPath)
+{
+	Shader::initialize(vertexPath, fragmentPath, geometryPath);
+	timelocation = glGetUniformLocation(id, "time");
+	texturelocation = glGetUniformLocation(id, "texture");
+	return 0;
+}

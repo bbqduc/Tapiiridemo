@@ -28,6 +28,13 @@ struct ShaderWithMVP : public Shader
 	int initialize(const char* vertexPath, const char* fragmentPath, const char* geometryPath);
 };
 
+struct ShaderPostProcessing : public Shader
+{
+	GLint timelocation;
+	GLint texturelocation;
+	int initialize(const char* vertexPath, const char* fragmentPath, const char* geometryPath);
+};
+
 struct Framebuffer
 {
 	bool initialized;
