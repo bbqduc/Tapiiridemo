@@ -94,5 +94,20 @@
     <None Include="shaders\pointToSquare.geom">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="particlecalculator.vert">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="particlecalculator.frag">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="renderparticles.vert">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="shaders\post.vert">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="shaders\post.frag">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

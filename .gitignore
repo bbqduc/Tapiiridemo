@@ -15,3 +15,5 @@ ipch/
 *.opensdf
 *.vcxproj.user
 Release/
+bass.dll
+bass.lib

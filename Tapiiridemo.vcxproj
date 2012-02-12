@@ -101,6 +101,9 @@
     <ClInclude Include="snd.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="particlecalculator.frag" />
+    <None Include="particlecalculator.vert" />
+    <None Include="renderparticles.vert" />
     <None Include="shaders\disco.frag" />
     <None Include="shaders\distanceblur.frag" />
     <None Include="shaders\moonriver.frag" />
@@ -109,6 +112,8 @@
     <None Include="shaders\plain.vert" />
     <None Include="shaders\plainMVP.vert" />
     <None Include="shaders\pointToSquare.geom" />
+    <None Include="shaders\post.frag" />
+    <None Include="shaders\post.vert" />
     <None Include="shaders\timemover.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
