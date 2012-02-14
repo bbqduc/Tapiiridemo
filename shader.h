@@ -6,12 +6,17 @@
 #include <GL3/gl3w.h>
 #include <GL/glfw.h>
 #include <assert.h>
+#include <string>
 
 struct Shader
 {
 	GLuint id;
 	GLint readShaderSource(const char* path, char** target);
+	std::string vPath;
+	std::string fPath;
+	std::string gPath;
 	int initialize(const char* vertexPath, const char* fragmentPath, const char* geometryPath);
+	int initialize();
 };
 
 struct ShaderWithTime : public Shader

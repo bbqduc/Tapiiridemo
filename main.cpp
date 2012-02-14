@@ -11,6 +11,7 @@
 #include <ctime>
 #include <cmath>
 #include <cstdlib>
+#include <vector>
 
 #include "glutils.h"
 #include "snd.h"
@@ -20,9 +21,6 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include "concurrency.h"
-
-
-
 
 int init()
 {
@@ -253,6 +251,10 @@ int main()
 	ShaderPostProcessing post;
 	post.initialize("shaders/post.vert", "shaders/post.frag", "");
 	checkGLErrors("beforemainloop");
+	std::vector<Shader*> shaders;
+	shaders.push_back(&plain);
+	shaders.push_back(&pointShader);
+	shaders.push_back(&post);
 	float time = 0.0f;
 	int pos=0;
 	C_Mutex mtx;
@@ -260,6 +262,7 @@ int main()
 	C_Thread music(listentomusic, &d);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	Framebuffer postprocessing(1024, 768);
+	bool justinitialized=false;
 	while(running)
 	{
 		mtx.M_Lock();
@@ -277,6 +280,15 @@ int main()
 		//drawTimedTriangle(plain, fullScreenQuad, time);
 		glfwSwapBuffers();
 		running = !glfwGetKey(GLFW_KEY_ESC) && glfwGetWindowParam(GLFW_OPENED);
+		if(glfwGetKey(GLFW_KEY_F1)==GLFW_PRESS && !justinitialized)
+		{
+			for(auto it=shaders.begin(); it!=shaders.end(); ++it)
+			{
+				(*it)->initialize();
+			}
+			justinitialized=true;
+		}
+		else if(glfwGetKey(GLFW_KEY_F1)==GLFW_RELEASE) justinitialized=false;
 		glfwSleep(0.01);
 	}
 	music.M_Join();

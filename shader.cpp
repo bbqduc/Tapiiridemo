@@ -72,8 +72,17 @@ GLint Shader::readShaderSource(const char* path, GLchar** target)
 	return size;
 }
 
+int Shader::initialize()
+{
+	initialize(vPath.c_str(), fPath.c_str(), gPath.c_str());
+	return 0;
+}
+
 int Shader::initialize(const char* vertexPath, const char* fragmentPath, const char* geometryPath)
 {
+	if(vertexPath) vPath=vertexPath;
+	if(fragmentPath) fPath=fragmentPath;
+	if(geometryPath) gPath=geometryPath;
 	GLchar* vertexSource = 0, *fragmentSource = 0, *geometrySource = 0;
 	GLint vertexSize = 0, fragmentSize = 0, geometrySize = 0;
 	vertexSize = readShaderSource(vertexPath, &vertexSource);
