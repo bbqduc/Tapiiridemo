@@ -7,5 +7,5 @@ out vec4 vFragColor;
 
 void main(void)
 {
-	vFragColor=texture(textureID, texcoord);
+	vFragColor=0.5-texture(textureID, texcoord);
 }

@@ -33,9 +33,11 @@ Framebuffer::Framebuffer(unsigned int w, unsigned int h)
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
+	/*
 	glGenRenderbuffers(1, &rbo_depth);
 	glBindRenderbuffer(GL_RENDERBUFFER, rbo_depth);
 	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, w, h); // width&height
+	*/
 
 	glGenFramebuffers(1, &fb);
 	glBindFramebuffer(GL_FRAMEBUFFER, fb);
@@ -48,11 +50,6 @@ Framebuffer::Framebuffer(unsigned int w, unsigned int h)
 	}
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-	glGenBuffers(1, &vertices);
-	glBindBuffer(GL_ARRAY_BUFFER, vertices);
-	GLfloat fbo_vertices[8]={-1,-1, 1,-1, -1,-1, 1,1};
-	glBufferData(GL_ARRAY_BUFFER, sizeof(fbo_vertices), fbo_vertices, GL_STATIC_DRAW);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	initialized=true;
 }
 

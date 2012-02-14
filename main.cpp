@@ -224,7 +224,6 @@ void drawFramebuffer(const Framebuffer& fb, const ShaderPostProcessing& shader, 
 	glUseProgram(shader.id);
 	glBindTexture(GL_TEXTURE_2D, fb.fbo_texture);
 	glUniform1f(shader.timelocation, time);
-	glUniform1i(shader.texturelocation, 0);
 	glBindVertexArray(model.VAO_id);
 	glBindBuffer(GL_ARRAY_BUFFER, model.VBO_vertices_id);
 	glDrawElements(model.drawMode, model.numPolygons*3, GL_UNSIGNED_INT, 0);
