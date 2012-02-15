@@ -185,6 +185,7 @@ struct threaddata
 {
 	C_Mutex* mtx;
 	int* running;
+	bool* paused;
 	std::list<Particle>* particles;
 	int* pos;
 };
@@ -199,6 +200,7 @@ void listentomusic(void* args)
 {
 	threaddata* d=(threaddata*)args;
 	int* running=d->running;
+	bool* paused=d->paused;
 	int* pos=d->pos;
 	C_Mutex* mtx=d->mtx;
 	C_CondVar c;
@@ -209,11 +211,16 @@ void listentomusic(void* args)
 	s.play();
 	while(*running)
 	{
-		c.M_Wait();
-		mtx->M_Lock();
-		emitParticles(particles, 40);
-		(*pos)++;
-		mtx->M_Unlock();
+		if(!*paused)
+		{
+			s.play();
+			c.M_Wait();
+			mtx->M_Lock();
+			emitParticles(particles, 40);
+			(*pos)++;
+			mtx->M_Unlock();
+		}
+		else s.pause();
 	}
 }
 
@@ -258,17 +265,22 @@ int main()
 	float time = 0.0f;
 	int pos=0;
 	C_Mutex mtx;
-	threaddata d={&mtx, &running, &particles, &pos};
+	bool paused=false;
+	threaddata d={&mtx, &running, &paused, &particles, &pos};
 	C_Thread music(listentomusic, &d);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	Framebuffer postprocessing(1024, 768);
-	bool justinitialized=false;
+	bool justpressed=false;
+	bool justpressed2=false;
 	while(running)
 	{
-		mtx.M_Lock();
-		tickParticles(particles, 0.01f);
-		mtx.M_Unlock();
-		time += 0.1f;
+		if(!paused)
+		{
+			mtx.M_Lock();
+			tickParticles(particles, 0.01f);
+			mtx.M_Unlock();
+			time += 0.1f;
+		}
 			
 		//drawTimedTriangle(plain, triangle, beat);
 		glBindFramebuffer(GL_FRAMEBUFFER, postprocessing.fb);
@@ -279,17 +291,32 @@ int main()
 		//drawPulsingTriangle(plain, triangle, beat);
 		//drawTimedTriangle(plain, fullScreenQuad, time);
 		glfwSwapBuffers();
-		running = !glfwGetKey(GLFW_KEY_ESC) && glfwGetWindowParam(GLFW_OPENED);
-		if(glfwGetKey(GLFW_KEY_F1)==GLFW_PRESS && !justinitialized)
+		if(glfwGetKey(GLFW_KEY_F1)==GLFW_PRESS && !justpressed)
 		{
 			for(auto it=shaders.begin(); it!=shaders.end(); ++it)
 			{
 				(*it)->initialize();
 			}
-			justinitialized=true;
+			justpressed=true;
 		}
-		else if(glfwGetKey(GLFW_KEY_F1)==GLFW_RELEASE) justinitialized=false;
+		else if(glfwGetKey(GLFW_KEY_F1)==GLFW_RELEASE) justpressed=false;
+		if(glfwGetKey(GLFW_KEY_SPACE)==GLFW_PRESS && !justpressed2)
+		{
+			if(paused) paused=false;
+			else paused=true;
+			justpressed2=true;
+		}
+		else if(glfwGetKey(GLFW_KEY_SPACE)==GLFW_RELEASE) justpressed2=false;
+		if(glfwGetKey(GLFW_KEY_LEFT)==GLFW_PRESS)
+		{
+			time-=0.5f;
+		}
+		if(glfwGetKey(GLFW_KEY_RIGHT)==GLFW_PRESS)
+		{
+			time+=0.5f;
+		}
 		glfwSleep(0.01);
+		running = !glfwGetKey(GLFW_KEY_ESC) && glfwGetWindowParam(GLFW_OPENED);
 	}
 	music.M_Join();
 	glfwTerminate();

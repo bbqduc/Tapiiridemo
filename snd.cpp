@@ -33,6 +33,11 @@ void Snd::play() const
 	BASS_ChannelPlay(handle, 0);
 }
 
+void Snd::pause() const
+{
+	BASS_ChannelPause(handle);
+}
+
 std::pair<int,int> Snd::getMODPosition() const
 {
 	long pos=BASS_ChannelGetPosition(handle,BASS_POS_MUSIC_ORDER);

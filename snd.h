@@ -60,6 +60,7 @@ class Snd
 		void load(const std::string& file);
 		void loadMOD(const std::string& file);
 		void play() const;
+		void pause() const;
 		unsigned long long getPosition() const;
 		std::pair<int,int> getMODPosition() const;
 		unsigned int getSeconds() const;
