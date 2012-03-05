@@ -25,14 +25,11 @@ __kernel void simulate(
 	}
 
 __kernel void generate(
-	__global float4* pos,
-	__global float4* vel
+	__global float4* pos
 	)
 	{
 		int gti = get_global_id(0); // global id of work-item ( == index to update)
 		int n = get_global_size(0);	//  number of particles
 
 		pos[gti] = (float4)(0.0f,0.0f,0.0f,10.0f);
-		float value = 5*((float)gti - (float)n/2)/n;
-		vel[gti] = (float4)(0,0,0,0);//(value*3,value*2,value,value);
 	}

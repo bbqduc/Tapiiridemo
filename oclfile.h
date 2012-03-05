@@ -20,7 +20,7 @@ class OCLProg
 	cl::BufferGL posBuffer;
 	cl::Buffer velBuffer, accBuffer;
 
-	float* accelerations;
+	float *accelerations, *velocities;
 
 	void initCL();
 public:

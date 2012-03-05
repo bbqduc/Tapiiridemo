@@ -103,7 +103,6 @@ OCLProg::OCLProg(const std::string& kernelFile)
 		simulateKernel.setArg(2, velBuffer);
 		simulateKernel.setArg(1, posBuffer);
 
-		generateKernel.setArg(1, velBuffer);
 		generateKernel.setArg(0, posBuffer);
 		cl_vbos.push_back(posBuffer);
 
@@ -114,9 +113,13 @@ OCLProg::OCLProg(const std::string& kernelFile)
 			<< '(' << error.err() << ')' << std::endl;
 	}
 	accelerations = new float[vecLen*4];
+	velocities = new float[vecLen*4];
 	srand(time(0));
 	for(int i = 0; i < vecLen; ++i)
+	{
 		accelerations[i] = (rand()%50-25);
+		velocities[i] = (rand()%50-25);
+	}
 }
 
 void OCLProg::generate()
@@ -124,6 +127,7 @@ void OCLProg::generate()
 
 	cl::Event clevent;
 	queue.enqueueWriteBuffer(accBuffer, CL_TRUE, 0, vecSize, accelerations, NULL, &clevent);
+	queue.enqueueWriteBuffer(velBuffer, CL_TRUE, 0, vecSize, accelerations, NULL, &clevent);
 	glFinish();
 	queue.enqueueAcquireGLObjects(&cl_vbos, NULL, &clevent);
 	queue.enqueueNDRangeKernel(generateKernel, cl::NullRange, cl::NDRange(vecLen), cl::NullRange, NULL, &clevent);
