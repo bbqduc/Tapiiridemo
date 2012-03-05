@@ -3,6 +3,15 @@
 #include <cstdlib>
 #include <ctime>
 
+#if defined __APPLE__ || defined(MACOSX)
+#else
+#if defined WIN32
+#else
+//needed for context sharing functions
+#include <GL/glx.h>
+#endif
+#endif
+
 void displayPlatformInfo(cl::vector< cl::Platform > platformList,
 	int deviceType)
 {
@@ -25,16 +34,61 @@ void OCLProg::initCL()
 		cl::Platform::get(&platformList);
 
 		displayPlatformInfo(platformList, CL_DEVICE_TYPE_GPU);
-		std::cout << "Context : " << wglGetCurrentContext() << "\n";
-		std::cout << "DC : " << wglGetCurrentDC() << "\n";
 
-		cl_context_properties cprops[] = 
-		{CL_GL_CONTEXT_KHR, (cl_context_properties)wglGetCurrentContext(), 
-		CL_WGL_HDC_KHR, (cl_context_properties)wglGetCurrentDC(),
-		CL_CONTEXT_PLATFORM, (cl_context_properties)(platformList[0])(),
-		0};
-
-		context = cl::Context(CL_DEVICE_TYPE_GPU, cprops);
+#if defined (__APPLE__) || defined(MACOSX)
+		CGLContextObj kCGLContext = CGLGetCurrentContext();
+		CGLShareGroupObj kCGLShareGroup = CGLGetShareGroup(kCGLContext);
+		cl_context_properties props[] =
+		{
+			CL_CONTEXT_PROPERTY_USE_CGL_SHAREGROUP_APPLE, (cl_context_properties)kCGLShareGroup,
+			0
+		};
+		//Apple's implementation is weird, and the default values assumed by cl.hpp don't work
+		//this works
+		//cl_context cxGPUContext = clCreateContext(props, 0, 0, NULL, NULL, &err);
+		//these dont
+		//cl_context cxGPUContext = clCreateContext(props, 1,(cl_device_id*)&devices.front(), NULL, NULL, &err);
+		//cl_context cxGPUContext = clCreateContextFromType(props, CL_DEVICE_TYPE_GPU, NULL, NULL, &err);
+		//printf("error? %s\n", oclErrorString(err));
+		try{
+			context = cl::Context(props);   //had to edit line 1448 of cl.hpp to add this constructor
+		}
+		catch (cl::Error er) {
+			std::cerr << er.what() << '\n';
+		}
+#else
+#if defined WIN32 // Win32
+		cl_context_properties props[] =
+		{
+			CL_GL_CONTEXT_KHR, (cl_context_properties)wglGetCurrentContext(),
+			CL_WGL_HDC_KHR, (cl_context_properties)wglGetCurrentDC(),
+			CL_CONTEXT_PLATFORM, (cl_context_properties)(platformList[0])(),
+			0
+		};
+		//cl_context cxGPUContext = clCreateContext(props, 1, &cdDevices[uiDeviceUsed], NULL, NULL, &err);
+		try{
+			context = cl::Context(CL_DEVICE_TYPE_GPU, props);
+		}
+		catch (cl::Error er) {
+			std::cerr << er.what() << '\n';
+		}
+#else
+		cl_context_properties props[] =
+		{
+			CL_GL_CONTEXT_KHR, (cl_context_properties)glXGetCurrentContext(),
+			CL_GLX_DISPLAY_KHR, (cl_context_properties)glXGetCurrentDisplay(),
+			CL_CONTEXT_PLATFORM, (cl_context_properties)(platformList[0])(),
+			0
+		};
+		//cl_context cxGPUContext = clCreateContext(props, 1, &cdDevices[uiDeviceUsed], NULL, NULL, &err);
+		try{
+			context = cl::Context(CL_DEVICE_TYPE_GPU, props);
+		}
+		catch (cl::Error er) {
+			printf("ERROR: %s(%s)\n", er.what(), oclErrorString(er.err()));
+		}
+#endif
+#endif
 
 		devices = context.getInfo<CL_CONTEXT_DEVICES>();
 
@@ -90,7 +144,7 @@ OCLProg::OCLProg(const std::string& kernelFile)
 
 		glEnableVertexAttribArray(0);
 		glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
-		
+
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		glBindVertexArray(0);
 		glFinish();
@@ -98,7 +152,7 @@ OCLProg::OCLProg(const std::string& kernelFile)
 		velBuffer = cl::Buffer(context, CL_MEM_READ_WRITE, vecSize);
 		accBuffer = cl::Buffer(context, CL_MEM_READ_ONLY, vecSize);
 		posBuffer = cl::BufferGL(context, CL_MEM_READ_WRITE, posVBOid, &err);
-		
+
 		simulateKernel.setArg(3, accBuffer);
 		simulateKernel.setArg(2, velBuffer);
 		simulateKernel.setArg(1, posBuffer);
