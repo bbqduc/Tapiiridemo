@@ -31,5 +31,5 @@ __kernel void generate(
 		int gti = get_global_id(0); // global id of work-item ( == index to update)
 		int n = get_global_size(0);	//  number of particles
 
-		pos[gti] = (float4)(0.0f,0.0f,0.0f,10.0f);
+		pos[gti] = (float4)(0.0f,0.0f,0.0f,1000.0f);
 	}

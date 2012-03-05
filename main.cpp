@@ -289,7 +289,7 @@ int main()
 	{
 		prog.simulate(negsim ? -0.01f : 0.01f);
 		++simRounds;
-		if(simRounds == 100)
+		if(simRounds == 300)
 		{
 			simRounds = 0;
 			negsim = !negsim;

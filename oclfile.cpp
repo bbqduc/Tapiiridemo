@@ -107,8 +107,6 @@ OCLProg::OCLProg(const std::string& kernelFile)
 		cl_vbos.push_back(posBuffer);
 
 	} catch (cl::Error error) {
-		if(err == CL_OUT_OF_HOST_MEMORY)
-			std::cerr << "HERP" << std::endl;
 		std::cerr << "caught exception: " << error.what() 
 			<< '(' << error.err() << ')' << std::endl;
 	}
@@ -117,8 +115,8 @@ OCLProg::OCLProg(const std::string& kernelFile)
 	srand(time(0));
 	for(int i = 0; i < vecLen; ++i)
 	{
-		accelerations[i] = (rand()%50-25);
-		velocities[i] = (rand()%50-25);
+		accelerations[i] = ((rand()%5000-2500))/100.0f;
+		velocities[i] = ((rand()%5000-2500))/100.0f;
 	}
 }
 
