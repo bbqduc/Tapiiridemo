@@ -39,6 +39,9 @@
     <ClCompile Include="concurrency.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="oclfile.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="shader.h">
@@ -63,6 +66,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="concurrency.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="oclfile.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -107,6 +113,12 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="shaders\post.frag">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="simulation.cl">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="shaders\realplain.frag">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>

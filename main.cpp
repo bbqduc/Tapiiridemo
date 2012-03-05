@@ -1,9 +1,9 @@
 #include <GL3/gl3w.h>
 #include <GL/glfw.h>
 #ifdef __APPLE__
-	#include <OpenGL/gl.h>
+#include <OpenGL/gl.h>
 #else
-	#include <GL/gl.h>
+#include <GL/gl.h>
 #endif
 #include <stdlib.h>
 #include <stdio.h>
@@ -20,6 +20,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include "concurrency.h"
+#include "oclfile.h"
 
 
 
@@ -131,13 +132,26 @@ void tickParticles(std::list<Particle>& particles, GLfloat dt)
 	}
 }
 
-void drawParticles(const std::list<Particle>& particles, const ShaderWithMVP& shader, Model& point, float time, int pos)
+void drawParticles(const std::list<Particle>& particles, const ShaderWithMVP& shader, float time, int pos, OCLProg& prog)
 {	
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	for(auto i = particles.begin(); i != particles.end(); ++i)
-		drawParticle(shader, *i, point, time, pos);
+	glm::mat4 perspective = glm::perspective(45.0f, 1024.0f/768.0f, 1.0f, 1000.0f);
+	glm::mat4 rotate = glm::rotate(glm::mat4(), (float)sin(time/20)*(float)cos(time/20)*360.0f, glm::vec3(sin(time/20), cos(time/20), (sin(time/20)*cos(time/20))/2));
+	glm::mat4 cam = glm::translate(glm::mat4(), glm::vec3(0.0f, 0.0f, -((sin(time/10)+2.0f)*6.0f)));
+
+	glm::mat4 result = perspective * cam * rotate;
+
+	glUseProgram(shader.id);
+	glUniform1f(shader.timelocation, time);
+	glUniform1i(shader.colorpos, pos);
+	glUniformMatrix4fv(shader.MVPLocation, 1, GL_FALSE, glm::value_ptr(result));
+
+	glBindVertexArray(prog.posVAOid);
+	glDrawArrays(GL_POINTS, 0, prog.vecLen);
+	glUseProgram(0);
 	glDisable(GL_BLEND);
+	checkGLErrors("drawParticles");
 }
 
 Model simpleTriangleModel()
@@ -240,12 +254,16 @@ int main()
 	if(init())
 		return -1;
 	printf("OpenGL version %s, GLSL %s\n", glGetString(GL_VERSION), glGetString(GL_SHADING_LANGUAGE_VERSION));
+	OCLProg prog("simulation.cl");
 
 	Model triangle = simpleTriangleModel();
 	Model fullScreenQuad = fullScreenQuadModel();
 	Model point = pointModel();
 
 	std::list<Particle> particles;
+
+	Shader realPlain;
+	realPlain.initialize("shaders/plain.vert", "shaders/realplain.frag", 0);
 
 	ShaderWithTime plain;
 	plain.initialize("shaders/timemover.vert", "shaders/music.frag", 0);
@@ -254,24 +272,35 @@ int main()
 	ShaderPostProcessing post;
 	post.initialize("shaders/post.vert", "shaders/post.frag", "");
 	checkGLErrors("beforemainloop");
+
+
 	float time = 0.0f;
+	int simRounds = 0;
 	int pos=0;
 	C_Mutex mtx;
 	threaddata d={&mtx, &running, &particles, &pos};
 	C_Thread music(listentomusic, &d);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	Framebuffer postprocessing(1024, 768);
+	prog.generate();
+	glPointSize(5.0f);
+	bool negsim = false;
 	while(running)
 	{
+		prog.simulate(negsim ? -0.01f : 0.01f);
+		++simRounds;
+		if(simRounds == 100)
+		{
+			simRounds = 0;
+			negsim = !negsim;
+		}
 		mtx.M_Lock();
-		tickParticles(particles, 0.01f);
 		mtx.M_Unlock();
 		time += 0.1f;
-			
-		//drawTimedTriangle(plain, triangle, beat);
 		glBindFramebuffer(GL_FRAMEBUFFER, postprocessing.fb);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		drawParticles(particles, pointShader, point, time, (pos%3));
+
+		drawParticles(particles, pointShader, time, (pos%3), prog);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		drawFramebuffer(postprocessing, post, fullScreenQuad, time);
 		//drawPulsingTriangle(plain, triangle, beat);

@@ -2,7 +2,7 @@
 
 uniform float time;
 
-layout(location=0) in vec3 in_Position;
+layout(location=0) in vec4 in_Position;
 
 smooth out float dist;
 void main()
