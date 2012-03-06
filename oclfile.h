@@ -1,11 +1,11 @@
 #pragma once
 
-#include <GL3\gl3w.h>
+#include <GL3/gl3w.h>
 
 #define __CL_ENABLE_EXCEPTIONS
 #define __NO_STD_VECTOR
 
-#include <CL\cl.hpp>
+#include "cl.hpp"
 #include <fstream>
 #include <string>
 #include <iostream>
@@ -24,7 +24,7 @@ class OCLProg
 
 	void initCL();
 public:
-	static const unsigned int vecLen = 65535*2*2*2;
+	static const unsigned int vecLen = 65535;
 	static const unsigned int vecSize = vecLen*sizeof(cl_float4);
 
 	cl_float4* posData;

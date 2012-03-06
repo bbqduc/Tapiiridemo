@@ -17,8 +17,8 @@ __kernel void simulate(
 		v += dt*a;
 		p -= dt2;
 
-		p *= p.s3 > 0 ? 1.0 : 0.0;
-		v *= p.s3 > 0 ? 1.0 : 0.0;
+		//p *= p.s3 > 0 ? 1.0 : 0.0;
+		//v *= p.s3 > 0 ? 1.0 : 0.0;
 
 		pos[gti] = p;
 		vel[gti] = v;

@@ -2,6 +2,7 @@
 #include <utility>
 #include <cstdlib>
 #include <ctime>
+#include <istream>
 
 #if defined __APPLE__ || defined(MACOSX)
 #else
@@ -51,7 +52,7 @@ void OCLProg::initCL()
 		//cl_context cxGPUContext = clCreateContextFromType(props, CL_DEVICE_TYPE_GPU, NULL, NULL, &err);
 		//printf("error? %s\n", oclErrorString(err));
 		try{
-			context = cl::Context(props);   //had to edit line 1448 of cl.hpp to add this constructor
+			context = cl::Context(CL_DEVICE_TYPE_GPU, props);   //had to edit line 1448 of cl.hpp to add this constructor
 		}
 		catch (cl::Error er) {
 			std::cerr << er.what() << '\n';
@@ -104,7 +105,7 @@ OCLProg::OCLProg(const std::string& kernelFile)
 
 	initCL();
 
-	std::ifstream file(kernelFile);
+	std::ifstream file(kernelFile.c_str());
 	std::string prog(std::istreambuf_iterator<char>(file),
 		(std::istreambuf_iterator<char>()));
 	cl::Program::Sources source(1, std::make_pair(prog.c_str(), prog.length()+1));
