@@ -85,7 +85,8 @@ void OCLProg::initCL()
 			context = cl::Context(CL_DEVICE_TYPE_GPU, props);
 		}
 		catch (cl::Error er) {
-			printf("ERROR: %s(%s)\n", er.what(), oclErrorString(er.err()));
+			std::cerr << "caught exception: " << er.what() 
+			<< '(' << er.err() << ')' << std::endl;
 		}
 #endif
 #endif
@@ -176,7 +177,6 @@ OCLProg::OCLProg(const std::string& kernelFile)
 
 void OCLProg::generate()
 {
-
 	cl::Event clevent;
 	queue.enqueueWriteBuffer(accBuffer, CL_TRUE, 0, vecSize, accelerations, NULL, &clevent);
 	queue.enqueueWriteBuffer(velBuffer, CL_TRUE, 0, vecSize, accelerations, NULL, &clevent);
