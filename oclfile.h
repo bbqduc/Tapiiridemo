@@ -24,7 +24,7 @@ class OCLProg
 
 	void initCL();
 public:
-	static const unsigned int vecLen = 65536;
+	static const unsigned int vecLen = 65536/2;
 	static const unsigned int vecSize = vecLen*sizeof(cl_float4);
 
 	cl_float4* posData;
