@@ -1,6 +1,7 @@
 #version 330 core
 
 smooth in vec2 relativeToCenter;
+in float z;
 out vec4 vFragColor;
 
 float gauss(float x, float a)
@@ -22,7 +23,7 @@ void main(void)
 	float dist = relativeToCenter.x*relativeToCenter.x + relativeToCenter.y * relativeToCenter.y;
 	dist *= 100;
 	float mul = 1.0-dist;
-
-	vFragColor = vec4(mul*(2.5-pos)*abs(relativePosition.x)*abs(sin(time)), mul*(3.5-pos)*abs(relativePosition.y), mul*(pos+0.5)*abs(relativePosition.x+relativePosition.y), 1.0-dist);
+	vFragColor = vec4(dist+sin(time), abs(z)/100.0f+abs(relativePosition.x), abs(100-z)/100.0f+abs(relativePosition.y), 1.0-dist);
+//	vFragColor = vec4(mul*(2.5-pos)*abs(relativePosition.x)*abs(sin(time)), mul*(3.5-pos)*abs(relativePosition.y), mul*(pos+0.5)*abs(relativePosition.x+relativePosition.y), 1.0-dist);
 
 }

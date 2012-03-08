@@ -27,7 +27,7 @@ void displayPlatformInfo(cl::vector< cl::Platform > platformList,
 	std::cout << "Platform is by: " << platformVendor << "\n";
 }
 
-void OCLProg::initCL()
+void OCLProg::initCL()				
 {
 	try {
 		cl::vector< cl::Platform > platformList;
@@ -101,6 +101,9 @@ void OCLProg::initCL()
 }
 
 OCLProg::OCLProg(const std::string& kernelFile)    
+	:
+	WORKGROUPSIZE(512),
+	NUMWORKGROUPS(vecLen/WORKGROUPSIZE)
 {
 
 	initCL();
@@ -129,13 +132,16 @@ OCLProg::OCLProg(const std::string& kernelFile)
 	cl_int err;
 	try {
 
-		simulateKernel = cl::Kernel(program, "simulate");
+		simulateKernel = cl::Kernel(program, "simulateNBODY");
 		generateKernel = cl::Kernel(program, "generate");
 
 		posData = new cl_float4[vecLen]; // 4th index is TTL
 		for(int i = 0; i < vecLen; ++i)
 			for(int j = 0; j < 4; ++j)
-				posData[i].s[j] = 0;
+			{
+				posData[i].s[j] = ((rand()%100)-50)/10.0f;
+				posData[i].s[3] = (rand()%5000)+1;
+			}																									
 		glGenVertexArrays(1, &posVAOid);
 		glBindVertexArray(posVAOid);
 
@@ -146,17 +152,17 @@ OCLProg::OCLProg(const std::string& kernelFile)
 		glEnableVertexAttribArray(0);
 		glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
 
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		glBindVertexArray(0);
 		glFinish();
 
 		velBuffer = cl::Buffer(context, CL_MEM_READ_WRITE, vecSize);
-		accBuffer = cl::Buffer(context, CL_MEM_READ_ONLY, vecSize);
+		accBuffer = cl::Buffer(context, CL_MEM_READ_WRITE, vecSize);
 		posBuffer = cl::BufferGL(context, CL_MEM_READ_WRITE, posVBOid, &err);
 
-		simulateKernel.setArg(3, accBuffer);
-		simulateKernel.setArg(2, velBuffer);
 		simulateKernel.setArg(1, posBuffer);
+		simulateKernel.setArg(2, velBuffer);
+		simulateKernel.setArg(3, accBuffer);
+		simulateKernel.setArg(4, sizeof(cl_float4)*NUMWORKGROUPS, NULL);
 
 		generateKernel.setArg(0, posBuffer);
 		cl_vbos.push_back(posBuffer);
@@ -165,14 +171,21 @@ OCLProg::OCLProg(const std::string& kernelFile)
 		std::cerr << "caught exception: " << error.what() 
 			<< '(' << error.err() << ')' << std::endl;
 	}
-	accelerations = new float[vecLen*4];
-	velocities = new float[vecLen*4];
+	accelerations = new cl_float4[vecLen];
+	velocities = new cl_float4[vecLen];
 	srand(time(0));
 	for(int i = 0; i < vecLen; ++i)
-	{
-		accelerations[i] = ((rand()%5000-2500))/100.0f;
-		velocities[i] = ((rand()%5000-2500))/100.0f;
-	}
+		for(int j = 0; j < 4; ++j)
+		{
+			accelerations[i].s[j] = 0;//((rand()%5000-2500))/100.0f;
+			velocities[i].s[j] = 0;//((rand()%5000-2500))/100.0f;
+		}
+	cl::Event clevent;
+	queue.enqueueWriteBuffer(accBuffer, CL_TRUE, 0, vecSize, accelerations, NULL, &clevent);
+	queue.enqueueWriteBuffer(velBuffer, CL_TRUE, 0, vecSize, accelerations, NULL, &clevent);
+
+	std::cout << "Number of workgroups " << NUMWORKGROUPS << "\nWork group size : " << WORKGROUPSIZE << "\n";
+	std::cout << "Number of particles " << vecLen << "\nSize of particles : " << vecSize << "\n";
 }
 
 void OCLProg::generate()
@@ -193,7 +206,7 @@ void OCLProg::simulate(float dt)
 	cl::Event clevent;
 	simulateKernel.setArg(0, dt);
 	queue.enqueueAcquireGLObjects(&cl_vbos, NULL, &clevent);
-	queue.enqueueNDRangeKernel(simulateKernel, cl::NullRange, cl::NDRange(vecLen), cl::NullRange, NULL, &clevent);
+	queue.enqueueNDRangeKernel(simulateKernel, cl::NullRange, cl::NDRange(vecLen), cl::NDRange(WORKGROUPSIZE), NULL, &clevent);
 	queue.enqueueReleaseGLObjects(&cl_vbos, NULL, &clevent);
 	queue.finish();
 }
