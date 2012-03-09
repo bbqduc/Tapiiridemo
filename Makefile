@@ -1,17 +1,17 @@
 ###############################
 # Update sources & headers here
 
-SRC=shader.cpp model.cpp snd.cpp particle.cpp glutils.cpp concurrency.cpp
-HEADERS=shader.h model.h snd.h particle.h glutils.h concurrency.h
+SRC=shader.cpp model.cpp snd.cpp particle.cpp glutils.cpp concurrency.cpp oclfile.cpp
+HEADERS=shader.h model.h snd.h particle.h glutils.h concurrency.h oclfile.h
 MAIN=main.cpp
 EXENAME=main
 
 ###############################
 
 CC=g++
-CCFLAGS=-Wall -Wextra -std=c++0x -DGLM_FORCE_CXX11 -O3
-INCLUDE=-Iglfw/include
-LIBS=-Lglfw/lib/x11 -lglfw -lGLU -lbass -L.
+CCFLAGS=-Wall -Wextra -std=c++0x -DGLM_FORCE_CXX11
+INCLUDE=-I./glfw/include -I/usr/local/cuda/include/
+LIBS=-Lglfw/lib/x11 -lglfw -lGLU -lbass -lOpenCL -L/usr/local/cuda/lib/ -L.
 OBJ=$(SRC:.cpp=.o)
 
 all: $(MAIN) $(OBJ) gl3w.o

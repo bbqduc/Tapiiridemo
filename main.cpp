@@ -23,6 +23,7 @@
 #include "oclfile.h"
 
 
+bool emitParticles = false;
 
 
 int init()
@@ -110,35 +111,13 @@ void drawParticle(const ShaderWithMVP& shader, const Particle& particle, const M
 	checkGLErrors("drawParticle");
 }
 
-void emitParticles(std::list<Particle>& particles, int amount)
-{
-	for(int i = 0; i < amount; ++i)
-	{
-		particles.push_back(Particle());
-		particles.back().randomize();
-	}
-}
-
-void tickParticles(std::list<Particle>& particles, GLfloat dt)
-{
-	for(auto i = particles.begin(); i != particles.end();)
-	{
-		if(i->timeLeft < 0.0f)
-		{
-			auto j = i; ++i; particles.erase(j, i);
-		}
-		i->tick(dt);
-		++i;
-	}
-}
-
 void drawParticles(const std::list<Particle>& particles, const ShaderWithMVP& shader, float time, int pos, OCLProg& prog)
 {	
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glm::mat4 perspective = glm::perspective(45.0f, 1024.0f/768.0f, 1.0f, 1000.0f);
+	glm::mat4 perspective = glm::perspective(45.0f, 1024.0f/768.0f, 1.0f, 100.0f);
 	glm::mat4 rotate = glm::rotate(glm::mat4(), (float)sin(time/20)*(float)cos(time/20)*360.0f, glm::vec3(sin(time/20), cos(time/20), (sin(time/20)*cos(time/20))/2));
-	glm::mat4 cam = glm::translate(glm::mat4(), glm::vec3(0.0f, 0.0f, -((sin(time/10)+2.0f)*6.0f)));
+	glm::mat4 cam = glm::translate(glm::mat4(), glm::vec3(0.0f, 0.0f, -80.0f));//-((sin(time/10)+2.0f)*6.0f)));
 
 	glm::mat4 result = perspective * cam * rotate;
 
@@ -149,6 +128,7 @@ void drawParticles(const std::list<Particle>& particles, const ShaderWithMVP& sh
 
 	glBindVertexArray(prog.posVAOid);
 	glDrawArrays(GL_POINTS, 0, prog.vecLen);
+
 	glUseProgram(0);
 	glDisable(GL_BLEND);
 	checkGLErrors("drawParticles");
@@ -201,7 +181,7 @@ struct threaddata
 {
 	C_Mutex* mtx;
 	int* running;
-	std::list<Particle>* particles;
+	OCLProg* prog;
 	int* pos;
 };
 
@@ -218,7 +198,6 @@ void listentomusic(void* args)
 	int* pos=d->pos;
 	C_Mutex* mtx=d->mtx;
 	C_CondVar c;
-	std::list<Particle>& particles=*(d->particles);
 	Snd s;
 	s.loadMOD("test.xm");
 	for(int i=0; i<64; i+=8) s.syncPosition(sync, -1, i, &c);
@@ -227,7 +206,7 @@ void listentomusic(void* args)
 	{
 		c.M_Wait();
 		mtx->M_Lock();
-		emitParticles(particles, 40);
+		emitParticles = true;
 		(*pos)++;
 		mtx->M_Unlock();
 	}
@@ -255,6 +234,7 @@ int main()
 		return -1;
 	printf("OpenGL version %s, GLSL %s\n", glGetString(GL_VERSION), glGetString(GL_SHADING_LANGUAGE_VERSION));
 	OCLProg prog("simulation.cl");
+//	prog.generate();
 
 	Model triangle = simpleTriangleModel();
 	Model fullScreenQuad = fullScreenQuadModel();
@@ -275,32 +255,36 @@ int main()
 
 
 	float time = 0.0f;
-	int simRounds = 0;
 	int pos=0;
 	C_Mutex mtx;
-	threaddata d={&mtx, &running, &particles, &pos};
+	threaddata d={&mtx, &running, &prog, &pos};
 	C_Thread music(listentomusic, &d);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	Framebuffer postprocessing(1024, 768);
-	prog.generate();
-	glPointSize(5.0f);
-	bool negsim = false;
+
+	bool reverse = false;
+	int counter = 0;
 	while(running)
 	{
-		prog.simulate(negsim ? -0.01f : 0.01f);
-		++simRounds;
-		if(simRounds == 300)
-		{
-			simRounds = 0;
-			negsim = !negsim;
-		}
+		prog.simulate(reverse ? -0.001f : 0.001f);
 		mtx.M_Lock();
+		if(emitParticles)
+		{
+			++counter;
+			emitParticles=false;
+			reverse = !(counter % 4);
+			if(counter > 40)
+			{
+				reverse = !reverse;
+			}
+//			prog.generate();
+		}
 		mtx.M_Unlock();
 		time += 0.1f;
 		glBindFramebuffer(GL_FRAMEBUFFER, postprocessing.fb);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		drawParticles(particles, pointShader, time, (pos%3), prog);
+		drawParticles(particles, pointShader, 0, (pos%3), prog);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		drawFramebuffer(postprocessing, post, fullScreenQuad, time);
 		//drawPulsingTriangle(plain, triangle, beat);

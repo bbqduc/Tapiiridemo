@@ -7,7 +7,7 @@
 
 #include "cl.hpp"
 #include <fstream>
-#include <string>
+#include <string> 
 #include <iostream>
 
 class OCLProg
@@ -20,16 +20,19 @@ class OCLProg
 	cl::BufferGL posBuffer;
 	cl::Buffer velBuffer, accBuffer;
 
-	float *accelerations, *velocities;
+	cl_float4 *accelerations, *velocities;
 
 	void initCL();
 public:
-	static const unsigned int vecLen = 65535;
+	static const unsigned int vecLen = 4096*2;
 	static const unsigned int vecSize = vecLen*sizeof(cl_float4);
 
 	cl_float4* posData;
 
-	GLuint posVBOid, posVAOid;
+	GLuint posVAOid, posVBOid;
+
+	int WORKGROUPSIZE;
+	int NUMWORKGROUPS; 
 
 	OCLProg(const std::string&);
 	void generate();
