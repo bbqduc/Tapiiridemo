@@ -266,7 +266,7 @@ int main()
 	int counter = 0;
 	while(running)
 	{
-		prog.simulate(reverse ? -0.001f : 0.001f);
+		prog.simulate(reverse ? -0.01f : 0.01f);
 		mtx.M_Lock();
 		if(emitParticles)
 		{
