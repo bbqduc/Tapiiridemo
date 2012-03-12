@@ -4,8 +4,8 @@
 #include <cstdlib>
 #include <ctime>
 
-#include <glm\glm.hpp>
-#include <glm\gtc\matrix_transform.hpp>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 #if defined __APPLE__ || defined(MACOSX)
 #else
@@ -86,7 +86,7 @@ void OCLProg::initCL()
 		};
 		//cl_context cxGPUContext = clCreateContext(props, 1, &cdDevices[uiDeviceUsed], NULL, NULL, &err);
 		try{
-			context = cl::Context(CL_DEVICE_TYPE_ALL, props);
+			context = cl::Context(CL_DEVICE_TYPE_GPU, props);
 		}
 		catch (cl::Error er) {
 			std::cerr << "caught exception: " << er.what() 
@@ -107,7 +107,7 @@ void OCLProg::initCL()
 
 OCLProg::OCLProg(const std::string& kernelFile)    
 	:
-	WORKGROUPSIZE(256),
+	WORKGROUPSIZE(64),
 	NUMWORKGROUPS(vecLen/WORKGROUPSIZE)
 {
 
@@ -221,7 +221,13 @@ void OCLProg::simulate(float dt)
 	simulateKernel.setArg(0, dt);
 	queue.enqueueAcquireGLObjects(&cl_vbos, NULL, &clevent);
 	queue.enqueueNDRangeKernel(simulateKernel, cl::NullRange, cl::NDRange(vecLen), cl::NDRange(WORKGROUPSIZE), NULL, &clevent);
-	queue.enqueueReleaseGLObjects(&cl_vbos, NULL, &clevent);
+	try {
+		queue.enqueueReleaseGLObjects(&cl_vbos, NULL, &clevent);
+	}
+	catch(cl::Error err)
+	{
+		std::cout << err.what() << ": " << clErrStr(err.err()) << std::endl;
+	}
 	queue.finish();
 }
 
