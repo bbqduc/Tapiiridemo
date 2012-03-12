@@ -234,7 +234,6 @@ int main()
 		return -1;
 	printf("OpenGL version %s, GLSL %s\n", glGetString(GL_VERSION), glGetString(GL_SHADING_LANGUAGE_VERSION));
 	OCLProg prog("simulation.cl");
-//	prog.generate();
 
 	Model triangle = simpleTriangleModel();
 	Model fullScreenQuad = fullScreenQuadModel();
@@ -266,7 +265,7 @@ int main()
 	int counter = 0;
 	while(running)
 	{
-		prog.simulate(reverse ? -0.001f : 0.001f);
+		prog.simulate(/*reverse ? -0.0001f :*/ 0.001f);
 		mtx.M_Lock();
 		if(emitParticles)
 		{
@@ -277,7 +276,6 @@ int main()
 			{
 				reverse = !reverse;
 			}
-//			prog.generate();
 		}
 		mtx.M_Unlock();
 		time += 0.1f;
@@ -287,8 +285,6 @@ int main()
 		drawParticles(particles, pointShader, 0, (pos%3), prog);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		drawFramebuffer(postprocessing, post, fullScreenQuad, time);
-		//drawPulsingTriangle(plain, triangle, beat);
-		//drawTimedTriangle(plain, fullScreenQuad, time);
 		glfwSwapBuffers();
 		running = !glfwGetKey(GLFW_KEY_ESC) && glfwGetWindowParam(GLFW_OPENED);
 		glfwSleep(0.01);
