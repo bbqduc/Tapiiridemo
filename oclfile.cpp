@@ -1,4 +1,5 @@
 #include "oclfile.h"
+#include "oclerr.h"
 #include <utility>
 #include <cstdlib>
 #include <ctime>
@@ -54,7 +55,7 @@ void OCLProg::initCL()
 			context = cl::Context(props);   //had to edit line 1448 of cl.hpp to add this constructor
 		}
 		catch (cl::Error er) {
-			std::cerr << er.what() << '\n';
+			std::cerr << er.what() << " " << clErrStr(er.err()) << std::endl;;
 		}
 #else
 #if defined WIN32 // Win32
@@ -70,7 +71,7 @@ void OCLProg::initCL()
 			context = cl::Context(CL_DEVICE_TYPE_GPU, props);
 		}
 		catch (cl::Error er) {
-			std::cerr << er.what() << '\n';
+			std::cerr << er.what() << " " << clErrStr(er.err()) << std::endl;;
 		}
 #else
 		cl_context_properties props[] =
@@ -82,21 +83,22 @@ void OCLProg::initCL()
 		};
 		//cl_context cxGPUContext = clCreateContext(props, 1, &cdDevices[uiDeviceUsed], NULL, NULL, &err);
 		try{
-			context = cl::Context(CL_DEVICE_TYPE_GPU, props);
+			context = cl::Context(CL_DEVICE_TYPE_ALL, props);
 		}
 		catch (cl::Error er) {
 			std::cerr << "caught exception: " << er.what() 
-			<< '(' << er.err() << ')' << std::endl;
+			<< '(' << er.err() << "): " << clErrStr(er.err()) << std::endl;
 		}
 #endif
 #endif
 
 		devices = context.getInfo<CL_CONTEXT_DEVICES>();
 
+		std::cout << "devices: " << devices.size() << std::endl;
 		queue = cl::CommandQueue(context, devices[0], 0);
 	} catch (cl::Error error) {
 		std::cerr << "caught exception: " << error.what() 
-			<< '(' << error.err() << ')' << std::endl;
+			<< '(' << error.err() << "): " << clErrStr(error.err()) << std::endl;
 	}
 }
 
@@ -126,7 +128,7 @@ OCLProg::OCLProg(const std::string& kernelFile)
 		std::cerr << "retrieving  log ... " << std::endl;
 		std::cerr 
 			<< program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(devices[0])
-			<< std::endl;
+			<< clErrStr(err.err()) << std::endl;
 		exit(-1);
 	}
 	cl_int err;
@@ -169,7 +171,7 @@ OCLProg::OCLProg(const std::string& kernelFile)
 
 	} catch (cl::Error error) {
 		std::cerr << "caught exception: " << error.what() 
-			<< '(' << error.err() << ')' << std::endl;
+			<< '(' << error.err() << "): " << clErrStr(error.err()) << std::endl;
 	}
 	accelerations = new cl_float4[vecLen];
 	velocities = new cl_float4[vecLen];
