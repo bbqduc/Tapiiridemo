@@ -67,8 +67,8 @@ __kernel void simulateNBODY(
 		float d = p.x*p.x + p.y*p.y + p.z*p.z;
 		float4 temp = (float4)(1.0f,1.0f,1.0f,0.0f);
 		a -= p*d;
-		p += dt*v + 0.5f*dt*dt*a;
-		v += dt*a;
+		p += dt*v + 0.2f;
+		v += dt*a / 1.0;
 
 		pos[gti] = p;
 		vel[gti] = v;
