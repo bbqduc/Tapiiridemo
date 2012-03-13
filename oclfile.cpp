@@ -139,20 +139,25 @@ OCLProg::OCLProg(const std::string& kernelFile)
 		generateKernel = cl::Kernel(program, "generate");
 
 		posData = new cl_float4[vecLen]; // 4th index is TTL
-		for(int i = 0; i < vecLen; ++i)
+		int blocks = 6;
+		int pointsPerBlock = vecLen/blocks;
+		for(int j = 0; j < blocks; ++j)
 		{
-			glm::vec4 vec(10.0f,0.0f,0.0f,0.0f);
-			glm::mat4 rotate = glm::rotate(glm::mat4(), (rand()%36001)/100.0f, glm::vec3(0.0f, 0.0f, 1.0f));
-			vec = vec * rotate;
-			posData[i].s[0] = vec[0];
-			posData[i].s[1] = vec[1];
-			posData[i].s[2] = vec[2];
-			posData[i].s[3] = (rand()%5000)+1;
-/*			for(int j = 0; j < 4; ++j)
+			for(int i = j*pointsPerBlock; i < (j+1)*pointsPerBlock; ++i)
 			{
+				glm::vec4 vec(5.0f,0.0f,0.0f,0.0f);
+				glm::mat4 rotate = glm::rotate(glm::mat4(), (rand()%36001)/100.0f, glm::vec3(0.0f, 0.0f, 1.0f));
+				vec = vec * rotate;
+				posData[i].s[0] = vec[0]+5*abs(j-2);
+				posData[i].s[1] = vec[1]+4*j;
+				posData[i].s[2] = vec[2]-6*j;
+				posData[i].s[3] = (rand()%5000)+1;
+				/*			for(int j = 0; j < 4; ++j)
+				{
 				posData[i].s[j] = ((rand()%100)-50)/10.0f;
 				posData[i].s[3] = (rand()%5000)+1;
-			}																									*/
+				}																									*/
+			}
 		}
 		glGenVertexArrays(1, &posVAOid);
 		glBindVertexArray(posVAOid);
