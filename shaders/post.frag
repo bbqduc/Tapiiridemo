@@ -27,6 +27,6 @@ void main(void)
 {
 	vec2 point=vec2(gl_FragCoord.x/1024, gl_FragCoord.y/768);
 	float c = mandelbrot(point*vec2(3.0));
-	//vFragColor=mix(texture(textureID, texcoord), vec4(c, 0.0, 0.0, 1.0), 0.5);
-	vFragColor=vec4(c, 0.0, 0.0, 1.0);
+	vFragColor=mix(texture(textureID, texcoord), vec4(c, 0.0, 0.0, 1.0), 0.0);
+	//vFragColor=vec4(c, 0.0, 0.0, 1.0);
 }
