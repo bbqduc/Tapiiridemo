@@ -24,7 +24,7 @@ class OCLProg
 
 	void initCL();
 public:
-	static const unsigned int vecLen = 4096*2;
+	static const unsigned int vecLen = 4096;
 	static const unsigned int vecSize = vecLen*sizeof(cl_float4);
 
 	cl_float4* posData;
@@ -34,7 +34,7 @@ public:
 	int WORKGROUPSIZE;
 	int NUMWORKGROUPS; 
 
-	OCLProg(const std::string&);
+	OCLProg(const std::string&, unsigned int);
 	void generate();
 	void simulate(float dt);
 	void getData();

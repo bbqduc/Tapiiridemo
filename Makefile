@@ -9,7 +9,7 @@ EXENAME=main
 ###############################
 
 CC=g++
-CCFLAGS=-Wall -Wextra -std=c++0x -DGLM_FORCE_CXX11
+CCFLAGS=-Wall -Wextra -std=c++0x -DGLM_FORCE_CXX11 -Os
 INCLUDE=-I./glfw/include -I/usr/local/cuda/include/
 LIBS=-Lglfw/lib/x11 -lglfw -lGLU -lbass -lOpenCL -L/usr/local/cuda/lib/ -L.
 OBJ=$(SRC:.cpp=.o)

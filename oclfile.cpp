@@ -1,8 +1,12 @@
 #include "oclfile.h"
+#include "oclerr.h"
 #include <utility>
 #include <cstdlib>
 #include <ctime>
 #include <istream>
+
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 #if defined __APPLE__ || defined(MACOSX)
 #else
@@ -55,7 +59,7 @@ void OCLProg::initCL()
 			context = cl::Context(CL_DEVICE_TYPE_GPU, props);   //had to edit line 1448 of cl.hpp to add this constructor
 		}
 		catch (cl::Error er) {
-			std::cerr << er.what() << '\n';
+			std::cerr << er.what() << " " << clErrStr(er.err()) << std::endl;;
 		}
 #else
 #if defined WIN32 // Win32
@@ -71,7 +75,7 @@ void OCLProg::initCL()
 			context = cl::Context(CL_DEVICE_TYPE_GPU, props);
 		}
 		catch (cl::Error er) {
-			std::cerr << er.what() << '\n';
+			std::cerr << er.what() << " " << clErrStr(er.err()) << std::endl;;
 		}
 #else
 		cl_context_properties props[] =
@@ -87,23 +91,24 @@ void OCLProg::initCL()
 		}
 		catch (cl::Error er) {
 			std::cerr << "caught exception: " << er.what() 
-			<< '(' << er.err() << ')' << std::endl;
+			<< '(' << er.err() << "): " << clErrStr(er.err()) << std::endl;
 		}
 #endif
 #endif
 
 		devices = context.getInfo<CL_CONTEXT_DEVICES>();
 
+		std::cout << "devices: " << devices.size() << std::endl;
 		queue = cl::CommandQueue(context, devices[0], 0);
 	} catch (cl::Error error) {
 		std::cerr << "caught exception: " << error.what() 
-			<< '(' << error.err() << ')' << std::endl;
+			<< '(' << error.err() << "): " << clErrStr(error.err()) << std::endl;
 	}
 }
 
-OCLProg::OCLProg(const std::string& kernelFile)    
+OCLProg::OCLProg(const std::string& kernelFile, unsigned int WGSize)
 	:
-	WORKGROUPSIZE(256),
+	WORKGROUPSIZE(WGSize),
 	NUMWORKGROUPS(vecLen/WORKGROUPSIZE)
 {
 
@@ -127,7 +132,7 @@ OCLProg::OCLProg(const std::string& kernelFile)
 		std::cerr << "retrieving  log ... " << std::endl;
 		std::cerr 
 			<< program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(devices[0])
-			<< std::endl;
+			<< clErrStr(err.err()) << std::endl;
 		exit(-1);
 	}
 	cl_int err;
@@ -137,12 +142,26 @@ OCLProg::OCLProg(const std::string& kernelFile)
 		generateKernel = cl::Kernel(program, "generate");
 
 		posData = new cl_float4[vecLen]; // 4th index is TTL
-		for(int i = 0; i < vecLen; ++i)
-			for(int j = 0; j < 4; ++j)
+		int blocks = 12;
+		int pointsPerBlock = vecLen/blocks;
+		for(int j = 0; j < blocks; ++j)
+		{
+			for(int i = j*pointsPerBlock; i < (j+1)*pointsPerBlock; ++i)
 			{
+				glm::vec4 vec(5.0f,0.0f,0.0f,0.0f);
+				glm::mat4 rotate = glm::rotate(glm::mat4(), (rand()%36001)/100.0f, glm::vec3(0.0f, 0.0f, 1.0f));
+				vec = vec * rotate;
+				posData[i].s[0] = vec[0]+5;//*abs(j-4);
+				posData[i].s[1] = vec[1]+4;//*j;
+				posData[i].s[2] = vec[2]-6;//*j;
+				posData[i].s[3] = 100;//(rand()%5000)+1;
+				/*			for(int j = 0; j < 4; ++j)
+				{
 				posData[i].s[j] = ((rand()%100)-50)/10.0f;
 				posData[i].s[3] = (rand()%5000)+1;
-			}																									
+				}																									*/
+			}
+		}
 		glGenVertexArrays(1, &posVAOid);
 		glBindVertexArray(posVAOid);
 
@@ -170,7 +189,7 @@ OCLProg::OCLProg(const std::string& kernelFile)
 
 	} catch (cl::Error error) {
 		std::cerr << "caught exception: " << error.what() 
-			<< '(' << error.err() << ')' << std::endl;
+			<< '(' << error.err() << "): " << clErrStr(error.err()) << std::endl;
 	}
 	accelerations = new cl_float4[vecLen];
 	velocities = new cl_float4[vecLen];
@@ -178,12 +197,12 @@ OCLProg::OCLProg(const std::string& kernelFile)
 	for(int i = 0; i < vecLen; ++i)
 		for(int j = 0; j < 4; ++j)
 		{
-			accelerations[i].s[j] = 0;//((rand()%5000-2500))/100.0f;
-			velocities[i].s[j] = 0;//((rand()%5000-2500))/100.0f;
+			accelerations[i].s[j] = ((rand()%5000-2500))/100.0f;
+			velocities[i].s[j] = ((rand()%5000-2500))/1000.0f;
 		}
 	cl::Event clevent;
 	queue.enqueueWriteBuffer(accBuffer, CL_TRUE, 0, vecSize, accelerations, NULL, &clevent);
-	queue.enqueueWriteBuffer(velBuffer, CL_TRUE, 0, vecSize, accelerations, NULL, &clevent);
+	queue.enqueueWriteBuffer(velBuffer, CL_TRUE, 0, vecSize, velocities, NULL, &clevent);
 
 	std::cout << "Number of workgroups " << NUMWORKGROUPS << "\nWork group size : " << WORKGROUPSIZE << "\n";
 	std::cout << "Number of particles " << vecLen << "\nSize of particles : " << vecSize << "\n";
@@ -193,7 +212,7 @@ void OCLProg::generate()
 {
 	cl::Event clevent;
 	queue.enqueueWriteBuffer(accBuffer, CL_TRUE, 0, vecSize, accelerations, NULL, &clevent);
-	queue.enqueueWriteBuffer(velBuffer, CL_TRUE, 0, vecSize, accelerations, NULL, &clevent);
+	queue.enqueueWriteBuffer(velBuffer, CL_TRUE, 0, vecSize, velocities, NULL, &clevent);
 	glFinish();
 	queue.enqueueAcquireGLObjects(&cl_vbos, NULL, &clevent);
 	queue.enqueueNDRangeKernel(generateKernel, cl::NullRange, cl::NDRange(vecLen), cl::NullRange, NULL, &clevent);
@@ -208,7 +227,13 @@ void OCLProg::simulate(float dt)
 	simulateKernel.setArg(0, dt);
 	queue.enqueueAcquireGLObjects(&cl_vbos, NULL, &clevent);
 	queue.enqueueNDRangeKernel(simulateKernel, cl::NullRange, cl::NDRange(vecLen), cl::NDRange(WORKGROUPSIZE), NULL, &clevent);
-	queue.enqueueReleaseGLObjects(&cl_vbos, NULL, &clevent);
+	try {
+		queue.enqueueReleaseGLObjects(&cl_vbos, NULL, &clevent);
+	}
+	catch(cl::Error err)
+	{
+		std::cout << err.what() << ": " << clErrStr(err.err()) << std::endl;
+	}
 	queue.finish();
 }
 

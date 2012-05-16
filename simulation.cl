@@ -44,6 +44,14 @@ __kernel void simulateNBODY(
 		float4 v = vel[gti];
 		float4 a = acc[gti];
 
+		a=0;
+		//v=0;
+
+		float vLen = length(v);
+
+		if(vLen > 10000)
+			v = normalize(v);
+
 		for(int jb=0; jb<nb; jb++)
 		{
 			pblock[ti] = pos[jb*nt+ti]; // Cache one particle position
@@ -61,7 +69,9 @@ __kernel void simulateNBODY(
 			barrier(CLK_LOCAL_MEM_FENCE); // Wait for others in this work-group
 		}
 
-		p += dt*v + 0.5f*dt*dt*a;
+		float d = p.x*p.x + p.y*p.y + p.z*p.z;
+		a -= p*d;
+		p += dt*v + 0.2f;
 		v += dt*a;
 
 		pos[gti] = p;
