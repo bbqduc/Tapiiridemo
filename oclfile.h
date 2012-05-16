@@ -5,7 +5,7 @@
 #define __CL_ENABLE_EXCEPTIONS
 #define __NO_STD_VECTOR
 
-#include <CL/cl.hpp>
+#include "cl.hpp"
 #include <fstream>
 #include <string> 
 #include <iostream>
