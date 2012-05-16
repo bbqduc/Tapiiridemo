@@ -91,7 +91,7 @@ void drawTimedTriangle(const ShaderWithTime& shader, const Model& triangle, floa
 
 void drawParticle(const ShaderWithMVP& shader, const Particle& particle, const Model& point, float time, int pos)
 {
-	glm::mat4 perspective = glm::perspective(45.0f, 1024.0f/768.0f, 1.0f, 1000.0f);
+	glm::mat4 perspective = glm::perspective(45.0f, 1024.0f/768.0f, 1.0f, 10000.0f);
 	glm::mat4 MVP = glm::translate(glm::mat4(), particle.position);
 	glm::mat4 rotate = glm::rotate(glm::mat4(), (float)sin(time/20)*(float)cos(time/20)*360.0f, glm::vec3(sin(time/20), cos(time/20), (sin(time/20)*cos(time/20))/2));
 	glm::mat4 cam = glm::translate(glm::mat4(), glm::vec3(0.0f, 0.0f, -((sin(time/10)+2.0f)*6.0f)));
@@ -116,10 +116,12 @@ void drawParticles(const std::list<Particle>& particles, const ShaderWithMVP& sh
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glm::mat4 perspective = glm::perspective(45.0f, 1024.0f/768.0f, 1.0f, 100.0f);
-	glm::mat4 rotate = glm::rotate(glm::mat4(), (float)sin(time/20)*(float)cos(time/20)*360.0f, glm::vec3(sin(time/20), cos(time/20), (sin(time/20)*cos(time/20))/2));
-	glm::mat4 cam = glm::translate(glm::mat4(), glm::vec3(0.0f, 0.0f, -50.0f));
+	glm::mat4 rotate = glm::rotate(glm::mat4(), (float)sin(time/10)*(float)cos(time/10)*360.0f, 
+//			glm::vec3(sin(time/20), cos(time/20), (sin(time/20)*cos(time/20))/2));
+			glm::vec3(0,0,1.0f));
+	glm::mat4 cam = glm::translate(glm::mat4(), glm::vec3(0.0f, 0.0f, -80.0f));
 
-	glm::mat4 result = perspective * cam;// * rotate;
+	glm::mat4 result = perspective * cam * rotate;
 
 	glUseProgram(shader.id);
 	glUniform1f(shader.timelocation, time);
@@ -299,8 +301,11 @@ int main(int argc, char** argv)
 	int counter = 0;
 	while(running)
 	{
-		if(tunnelDistance > 0.2f)
+		if(time > 31.0f)
+			prog.toCenter(0.001f);
+		else if(tunnelDistance > 0.2f)
 			prog.simulate(0.001f);
+
 		mtx.M_Lock();
 		if(emitParticles)
 		{
@@ -310,7 +315,7 @@ int main(int argc, char** argv)
 		mtx.M_Unlock();
 		time += 0.01f;
 		
-		for(int i = 0; i < 3; ++i) basecolor[i] /= 1.15f;
+		for(int i = 0; i < 3; ++i) basecolor[i] /= 1.05f;
 
 		glBindFramebuffer(GL_FRAMEBUFFER, postprocessing.fb);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

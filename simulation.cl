@@ -21,6 +21,19 @@ __kernel void simulate(
 		vel[gti] = v;
 	}
 
+__kernel void toCenter(
+	float dt1,
+	__global float4* pos
+	)
+	{
+		const float4 dt = (float4)(dt1,dt1,dt1,1.0f);
+		int gti = get_global_id(0); // global id of work-item ( == index to update)
+		float4 v = pos[gti];
+		float t = 1.0f / length(v);
+		v /= 1+t+dt;
+		pos[gti] = v;
+	}
+
 
 __kernel void simulateNBODY(
 	float dt1,
@@ -37,6 +50,7 @@ __kernel void simulateNBODY(
 		int ti = get_local_id(0);
 
 		int n = get_global_size(0);
+		n = n/16;
 		int nt = get_local_size(0);
 		int nb = n/nt;
 
@@ -49,9 +63,10 @@ __kernel void simulateNBODY(
 
 		float vLen = length(v);
 
-		if(vLen > 10000)
+		if(vLen > 1000)
 			v = normalize(v);
 
+		int t = gti; t /= 16;t*= 16;
 		for(int jb=0; jb<nb; jb++)
 		{
 			pblock[ti] = pos[jb*nt+ti]; // Cache one particle position

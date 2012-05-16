@@ -16,7 +16,7 @@ class OCLProg
 	cl::vector<cl::Device> devices;
 	cl::vector<cl::Memory> cl_vbos;
 	cl::CommandQueue queue;
-	cl::Kernel generateKernel, simulateKernel;
+	cl::Kernel generateKernel, simulateKernel, toCenterKernel;
 	cl::BufferGL posBuffer;
 	cl::Buffer velBuffer, accBuffer;
 
@@ -24,7 +24,7 @@ class OCLProg
 
 	void initCL();
 public:
-	static const unsigned int vecLen = 4096;
+	static const unsigned int vecLen = 4096*2;
 	static const unsigned int vecSize = vecLen*sizeof(cl_float4);
 
 	cl_float4* posData;
@@ -37,6 +37,7 @@ public:
 	OCLProg(const std::string&, unsigned int);
 	void generate();
 	void simulate(float dt);
+	void toCenter(float dt);
 	void getData();
 	void printData();
 };

@@ -139,9 +139,10 @@ OCLProg::OCLProg(const std::string& kernelFile, unsigned int WGSize)
 
 		simulateKernel = cl::Kernel(program, "simulateNBODY");
 		generateKernel = cl::Kernel(program, "generate");
+		toCenterKernel = cl::Kernel(program, "toCenter");
 
 		posData = new cl_float4[vecLen]; // 4th index is TTL
-		int blocks = 12;
+		int blocks = 16;
 		int pointsPerBlock = vecLen/blocks;
 		for(int j = 0; j < blocks; ++j)
 		{
@@ -150,10 +151,13 @@ OCLProg::OCLProg(const std::string& kernelFile, unsigned int WGSize)
 				glm::vec4 vec(5.0f,0.0f,0.0f,0.0f);
 				glm::mat4 rotate = glm::rotate(glm::mat4(), (rand()%36001)/100.0f, glm::vec3(0.0f, 0.0f, 1.0f));
 				vec = vec * rotate;
-				posData[i].s[0] = vec[0]+5;//*abs(j-4);
-				posData[i].s[1] = vec[1]+4;//*j;
-				posData[i].s[2] = vec[2]-6;//*j;
-				posData[i].s[3] = 100;//(rand()%5000)+1;
+				posData[i].s[0] = vec[0]+0.5*j;
+				posData[i].s[1] = vec[1]+0.5*j;
+				posData[i].s[2] = vec[2];
+//				posData[i].s[0] = vec[0]+0.5*abs(j-8);
+//				posData[i].s[1] = vec[1]+0.5*j;
+//				posData[i].s[2] = vec[2]-0.5*j;
+				posData[i].s[3] = (rand()%50)+1;
 				/*			for(int j = 0; j < 4; ++j)
 				{
 				posData[i].s[j] = ((rand()%100)-50)/10.0f;
@@ -178,6 +182,7 @@ OCLProg::OCLProg(const std::string& kernelFile, unsigned int WGSize)
 		accBuffer = cl::Buffer(context, CL_MEM_READ_WRITE, vecSize);
 		posBuffer = cl::BufferGL(context, CL_MEM_READ_WRITE, posVBOid, &err);
 
+		toCenterKernel.setArg(1, posBuffer);
 		simulateKernel.setArg(1, posBuffer);
 		simulateKernel.setArg(2, velBuffer);
 		simulateKernel.setArg(3, accBuffer);
@@ -226,6 +231,23 @@ void OCLProg::simulate(float dt)
 	simulateKernel.setArg(0, dt);
 	queue.enqueueAcquireGLObjects(&cl_vbos, NULL, &clevent);
 	queue.enqueueNDRangeKernel(simulateKernel, cl::NullRange, cl::NDRange(vecLen), cl::NDRange(WORKGROUPSIZE), NULL, &clevent);
+	try {
+		queue.enqueueReleaseGLObjects(&cl_vbos, NULL, &clevent);
+	}
+	catch(cl::Error err)
+	{
+		std::cout << err.what() << ": " << clErrStr(err.err()) << std::endl;
+	}
+	queue.finish();
+}
+
+void OCLProg::toCenter(float dt)
+{
+	glFinish();
+	cl::Event clevent;
+	toCenterKernel.setArg(0, dt);
+	queue.enqueueAcquireGLObjects(&cl_vbos, NULL, &clevent);
+	queue.enqueueNDRangeKernel(toCenterKernel, cl::NullRange, cl::NDRange(vecLen), cl::NDRange(WORKGROUPSIZE), NULL, &clevent);
 	try {
 		queue.enqueueReleaseGLObjects(&cl_vbos, NULL, &clevent);
 	}
