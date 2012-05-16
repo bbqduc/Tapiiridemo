@@ -105,9 +105,9 @@ void OCLProg::initCL()
 	}
 }
 
-OCLProg::OCLProg(const std::string& kernelFile)    
+OCLProg::OCLProg(const std::string& kernelFile, unsigned int WGSize)
 	:
-	WORKGROUPSIZE(64),
+	WORKGROUPSIZE(WGSize),
 	NUMWORKGROUPS(vecLen/WORKGROUPSIZE)
 {
 
@@ -141,7 +141,7 @@ OCLProg::OCLProg(const std::string& kernelFile)
 		generateKernel = cl::Kernel(program, "generate");
 
 		posData = new cl_float4[vecLen]; // 4th index is TTL
-		int blocks = 6;
+		int blocks = 12;
 		int pointsPerBlock = vecLen/blocks;
 		for(int j = 0; j < blocks; ++j)
 		{
@@ -150,10 +150,10 @@ OCLProg::OCLProg(const std::string& kernelFile)
 				glm::vec4 vec(5.0f,0.0f,0.0f,0.0f);
 				glm::mat4 rotate = glm::rotate(glm::mat4(), (rand()%36001)/100.0f, glm::vec3(0.0f, 0.0f, 1.0f));
 				vec = vec * rotate;
-				posData[i].s[0] = vec[0]+5*abs(j-2);
-				posData[i].s[1] = vec[1]+4*j;
-				posData[i].s[2] = vec[2]-6*j;
-				posData[i].s[3] = (rand()%5000)+1;
+				posData[i].s[0] = vec[0]+5;//*abs(j-4);
+				posData[i].s[1] = vec[1]+4;//*j;
+				posData[i].s[2] = vec[2]-6;//*j;
+				posData[i].s[3] = 100;//(rand()%5000)+1;
 				/*			for(int j = 0; j < 4; ++j)
 				{
 				posData[i].s[j] = ((rand()%100)-50)/10.0f;
@@ -196,12 +196,12 @@ OCLProg::OCLProg(const std::string& kernelFile)
 	for(int i = 0; i < vecLen; ++i)
 		for(int j = 0; j < 4; ++j)
 		{
-			accelerations[i].s[j] = 0;//((rand()%5000-2500))/100.0f;
-			velocities[i].s[j] = 0;//((rand()%5000-2500))/100.0f;
+			accelerations[i].s[j] = ((rand()%5000-2500))/100.0f;
+			velocities[i].s[j] = ((rand()%5000-2500))/1000.0f;
 		}
 	cl::Event clevent;
 	queue.enqueueWriteBuffer(accBuffer, CL_TRUE, 0, vecSize, accelerations, NULL, &clevent);
-	queue.enqueueWriteBuffer(velBuffer, CL_TRUE, 0, vecSize, accelerations, NULL, &clevent);
+	queue.enqueueWriteBuffer(velBuffer, CL_TRUE, 0, vecSize, velocities, NULL, &clevent);
 
 	std::cout << "Number of workgroups " << NUMWORKGROUPS << "\nWork group size : " << WORKGROUPSIZE << "\n";
 	std::cout << "Number of particles " << vecLen << "\nSize of particles : " << vecSize << "\n";
@@ -211,7 +211,7 @@ void OCLProg::generate()
 {
 	cl::Event clevent;
 	queue.enqueueWriteBuffer(accBuffer, CL_TRUE, 0, vecSize, accelerations, NULL, &clevent);
-	queue.enqueueWriteBuffer(velBuffer, CL_TRUE, 0, vecSize, accelerations, NULL, &clevent);
+	queue.enqueueWriteBuffer(velBuffer, CL_TRUE, 0, vecSize, velocities, NULL, &clevent);
 	glFinish();
 	queue.enqueueAcquireGLObjects(&cl_vbos, NULL, &clevent);
 	queue.enqueueNDRangeKernel(generateKernel, cl::NullRange, cl::NDRange(vecLen), cl::NullRange, NULL, &clevent);

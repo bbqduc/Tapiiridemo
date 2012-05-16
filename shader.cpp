@@ -179,7 +179,7 @@ int ShaderWithMVP::initialize(const char* vertexPath, const char* fragmentPath, 
 	Shader::initialize(vertexPath, fragmentPath, geometryPath);
 	MVPLocation = glGetUniformLocation(id, "MVP");
 	timelocation = glGetUniformLocation(id, "time");
-	colorpos = glGetUniformLocation(id, "pos");
+	basecolorpos = glGetUniformLocation(id, "basecolor");
 	return 0;
 }
 
@@ -188,5 +188,13 @@ int ShaderPostProcessing::initialize(const char* vertexPath, const char* fragmen
 	Shader::initialize(vertexPath, fragmentPath, geometryPath);
 	timelocation = glGetUniformLocation(id, "time");
 	texturelocation = glGetUniformLocation(id, "texture");
+	return 0;
+}
+
+int ShaderTunnel::initialize(const char* vertexPath, const char* fragmentPath, const char* geometryPath)
+{
+	Shader::initialize(vertexPath, fragmentPath, geometryPath);
+	timeLocation = glGetUniformLocation(id, "time");
+	tunnelDistancelocation = glGetUniformLocation(id, "tunnelDistance");
 	return 0;
 }

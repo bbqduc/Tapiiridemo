@@ -24,7 +24,7 @@ struct ShaderWithMVP : public Shader
 {
 	GLint MVPLocation;
 	GLint timelocation;
-	GLint colorpos;
+	GLint basecolorpos;
 	int initialize(const char* vertexPath, const char* fragmentPath, const char* geometryPath);
 };
 
@@ -32,6 +32,12 @@ struct ShaderPostProcessing : public Shader
 {
 	GLint timelocation;
 	GLint texturelocation;
+	int initialize(const char* vertexPath, const char* fragmentPath, const char* geometryPath);
+};
+
+struct ShaderTunnel : public ShaderWithTime
+{
+	GLint tunnelDistancelocation;
 	int initialize(const char* vertexPath, const char* fragmentPath, const char* geometryPath);
 };
 

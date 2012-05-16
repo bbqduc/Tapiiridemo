@@ -15,7 +15,7 @@ float blob(vec2 o, vec2 p)
 }
 
 uniform float time;
-uniform int pos;
+uniform vec4 basecolor;
 
 void main(void)
 {
@@ -23,7 +23,6 @@ void main(void)
 	float dist = relativeToCenter.x*relativeToCenter.x + relativeToCenter.y * relativeToCenter.y;
 	dist *= 100;
 	float mul = 1.0-dist;
-	vFragColor = vec4(dist+sin(time), abs(z)/100.0f+abs(relativePosition.x), abs(100-z)/100.0f+abs(relativePosition.y), 1.0-dist);
-//	vFragColor = vec4(mul*(2.5-pos)*abs(relativePosition.x)*abs(sin(time)), mul*(3.5-pos)*abs(relativePosition.y), mul*(pos+0.5)*abs(relativePosition.x+relativePosition.y), 1.0-dist);
+	vFragColor = basecolor * vec4(dist+sin(time), abs(z)/100.0f+abs(relativePosition.x), abs(100-z)/100.0f+abs(relativePosition.y), 1.0-dist);
 
 }

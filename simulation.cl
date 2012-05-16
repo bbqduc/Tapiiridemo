@@ -47,6 +47,11 @@ __kernel void simulateNBODY(
 		a=0;
 		//v=0;
 
+		float vLen = length(v);
+
+		if(vLen > 10000)
+			v = normalize(v);
+
 		for(int jb=0; jb<nb; jb++)
 		{
 			pblock[ti] = pos[jb*nt+ti]; // Cache one particle position
@@ -65,7 +70,6 @@ __kernel void simulateNBODY(
 		}
 
 		float d = p.x*p.x + p.y*p.y + p.z*p.z;
-		float4 temp = (float4)(1.0f,1.0f,1.0f,0.0f);
 		a -= p*d;
 		p += dt*v + 0.2f;
 		v += dt*a / 1.0;
