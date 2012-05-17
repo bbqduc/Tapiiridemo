@@ -23,9 +23,9 @@
 #include "concurrency.h"
 #include "oclfile.h"
 
+#define SECOND_EFFECT_START 40.0f
 
 bool emitParticles = false;
-
 
 int init()
 {
@@ -34,6 +34,7 @@ int init()
 		printf("GLFWINIT FAILED!\n");
 		return -1;
 	}
+	
 	glfwOpenWindowHint(GLFW_OPENGL_VERSION_MAJOR, 3);
 	glfwOpenWindowHint(GLFW_OPENGL_VERSION_MINOR, 2);
 	glfwOpenWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
@@ -118,8 +119,15 @@ void drawParticles(const std::list<Particle>& particles, const ShaderWithMVP& sh
 	glm::mat4 perspective = glm::perspective(45.0f, 1024.0f/768.0f, 1.0f, 100.0f);
 	glm::mat4 rotate = glm::rotate(glm::mat4(), (float)sin(time/10)*(float)cos(time/10)*360.0f, 
 //			glm::vec3(sin(time/20), cos(time/20), (sin(time/20)*cos(time/20))/2));
-			glm::vec3(0,0,1.0f));
-	glm::mat4 cam = glm::translate(glm::mat4(), glm::vec3(0.0f, 0.0f, -80.0f));
+			glm::vec3(0,1,1));
+	static float camdist=-80.0f;
+	if(time>SECOND_EFFECT_START) camdist*=0.99;
+	if(time>SECOND_EFFECT_START+2.0f)
+	{
+		basecolor[3]-=0.01f;
+		if(basecolor[3]<0.0f) basecolor[3]=0.0f;
+	}
+	glm::mat4 cam = glm::translate(glm::mat4(), glm::vec3(0.0f, 0.0f, camdist));
 
 	glm::mat4 result = perspective * cam * rotate;
 
@@ -301,10 +309,11 @@ int main(int argc, char** argv)
 	int counter = 0;
 	while(running)
 	{
-		if(time > 31.0f)
-			prog.toCenter(0.001f);
-		else if(tunnelDistance > 0.2f)
+		//if(time > 40.0f)
+			//prog.toCenter(0.001f);
+		if(tunnelDistance > 0.3f && time < SECOND_EFFECT_START)
 			prog.simulate(0.001f);
+		else if(time > SECOND_EFFECT_START && time < 50.0f) prog.simulate(0.0005f);
 
 		mtx.M_Lock();
 		if(emitParticles)
@@ -320,18 +329,22 @@ int main(int argc, char** argv)
 		glBindFramebuffer(GL_FRAMEBUFFER, postprocessing.fb);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		tunnelDistance *= 1.05;
-		basecolor[3]=tunnelDistance/16;
 
 		if(tunnelDistance < 1.0f)
+		{
+			basecolor[3]=tunnelDistance/0.9f;
+			tunnelDistance *= 1.009;
 			drawTunnel(tunnel, time, tunnelDistance, fullScreenQuad);
-		if(tunnelDistance > 0.2f)
+		}
+		if(tunnelDistance > 0.3f)
 			drawParticles(particles, pointShader, time, basecolor, prog);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		drawFramebuffer(postprocessing, post, fullScreenQuad, time);
 		glfwSwapBuffers();
 		running = !glfwGetKey(GLFW_KEY_ESC) && glfwGetWindowParam(GLFW_OPENED);
 		glfwSleep(0.01);
+
+		//std::cout << time << std::endl;
 	}
 	music.M_Join();
 	glfwTerminate();

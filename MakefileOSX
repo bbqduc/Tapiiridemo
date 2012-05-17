@@ -9,7 +9,7 @@ EXENAME=main
 ###############################
 
 CC=clang++
-CCFLAGS=-Wall -Wextra -std=c++0x -DGLM_FORCE_CXX11 -O3
+CCFLAGS=-Wall -Wextra -std=c++0x -DGLM_FORCE_CXX11 -Os
 INCLUDE=-Iglfw/include
 LIBS=-Lglfw/lib/cocoa -lglfw -lbass -L. -framework OpenGL -framework Cocoa -framework OpenCL
 OBJ=$(SRC:.cpp=.o)

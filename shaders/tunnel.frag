@@ -13,7 +13,7 @@ void main()
 
 	pos.x *= (resolution.x / resolution.y);
 
-	float v = atan(pos.y, pos.x);
+	float v = atan(pos.y+(sin(time/20)), pos.x);
 	float u = length(pos) - tunnelDistance;
 	u = max(u,0);
 
