@@ -309,11 +309,14 @@ int main(int argc, char** argv)
 	int counter = 0;
 	while(running)
 	{
-		//if(time > 40.0f)
-			//prog.toCenter(0.001f);
-		if(tunnelDistance > 0.3f && time < SECOND_EFFECT_START)
+		if(time > 40.0f)
+			if(time > 41.0f)
+				running=false;
+			else
+				prog.toCenter(0.001f);
+		else if(tunnelDistance > 0.3f && time < SECOND_EFFECT_START)
 			prog.simulate(0.001f);
-		else if(time > SECOND_EFFECT_START && time < 50.0f) prog.simulate(0.0005f);
+//		else if(time > SECOND_EFFECT_START && time < 35.0f) prog.simulate(0.0005f);
 
 		mtx.M_Lock();
 		if(emitParticles)
@@ -341,7 +344,7 @@ int main(int argc, char** argv)
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		drawFramebuffer(postprocessing, post, fullScreenQuad, time);
 		glfwSwapBuffers();
-		running = !glfwGetKey(GLFW_KEY_ESC) && glfwGetWindowParam(GLFW_OPENED);
+		running = running && (!glfwGetKey(GLFW_KEY_ESC) && glfwGetWindowParam(GLFW_OPENED));
 		glfwSleep(0.01);
 
 		//std::cout << time << std::endl;
